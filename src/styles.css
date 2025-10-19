@@ -1,0 +1,25 @@
+/* Importar estilos de ngx-toastr */
+@import 'ngx-toastr/toastr';
+
+/* Personalización opcional de toastr */
+.toast-container .ngx-toastr {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.toast-success {
+  background-color: #28a745;
+}
+
+.toast-error {
+  background-color: #dc3545;
+}
+
+.toast-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.toast-info {
+  background-color: #17a2b8;
+}

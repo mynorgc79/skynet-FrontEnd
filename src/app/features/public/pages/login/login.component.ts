@@ -43,6 +43,8 @@ export class LoginComponent {
             this.toastService.show({
               color: 'success',
               message: `Bienvenido ${response.user.name}!`,
+              icon: 'fas fa-check-circle',
+              title: 'Login exitoso',
               duration: 3000,
             });
             this.router.navigateByUrl('/dashboard');
@@ -51,6 +53,8 @@ export class LoginComponent {
             this.toastService.show({
               color: 'error',
               message,
+              icon: 'fas fa-exclamation-triangle',
+              title: 'Error de autenticación',
               duration: 4000,
             });
           },
