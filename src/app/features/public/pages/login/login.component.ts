@@ -42,7 +42,7 @@ export class LoginComponent {
             localStorage.setItem('token', response.token);
             this.toastService.show({
               color: 'success',
-              message: `Bienvenido ${response.user.name}!`,
+              message: `Bienvenido ${response.user.nombre} ${response.user.apellido}!`,
               icon: 'fas fa-check-circle',
               title: 'Login exitoso',
               duration: 3000,
