@@ -70,4 +70,21 @@ export class ToastService {
   public clear(): void {
     this.toastr.clear();
   }
+
+  // Alias para compatibilidad
+  public showSuccess(message: string, title?: string): void {
+    this.success(message, title);
+  }
+
+  public showError(message: string, title?: string): void {
+    this.error(message, title);
+  }
+
+  public showWarning(message: string, title?: string): void {
+    this.warning(message, title);
+  }
+
+  public showInfo(message: string, title?: string): void {
+    this.info(message, title);
+  }
 }
