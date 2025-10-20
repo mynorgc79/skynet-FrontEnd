@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { Usuario, Cliente, Visita, Ejecucion, UsuarioFilter, UsuarioCreateDTO, UsuarioUpdateDTO, RoleTipo } from '../interfaces';
+import { Usuario, Cliente, Visita, Ejecucion, UsuarioFilter, UsuarioCreateDTO, UsuarioUpdateDTO, RoleTipo, ClienteFilter, ClienteCreateDTO, ClienteUpdateDTO } from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -95,43 +95,147 @@ export class MockDataService {
   private clientes: Cliente[] = [
     {
       idCliente: 1,
-      nombre: 'Empresa',
-      apellido: 'ABC S.A.',
-      correo: 'contacto@empresaabc.com',
-      email: 'contacto@empresaabc.com',
-      coordenadasMaps: '14.6084,-90.5253',
+      nombre: 'Juan Carlos',
+      apellido: 'Pérez López',
+      email: 'juan.perez@empresaabc.com',
+      telefono: '+502 2234-5678',
+      empresa: 'Empresa ABC S.A.',
+      direccion: '15 Avenida 12-34 Zona 10',
+      ciudad: 'Guatemala',
+      departamento: 'Guatemala',
+      codigoPostal: '01010',
       latitud: 14.6084,
-      longitud: -90.5253
+      longitud: -90.5253,
+      coordenadasMaps: '14.6084,-90.5253',
+      activo: true,
+      fechaCreacion: new Date('2024-01-15'),
+      fechaActualizacion: new Date('2024-01-15')
     },
     {
       idCliente: 2,
-      nombre: 'Tech',
-      apellido: 'Solutions Ltd.',
-      correo: 'info@techsolutions.com',
-      email: 'info@techsolutions.com',
-      coordenadasMaps: '14.6180,-90.5130',
-      latitud: 14.6180,
-      longitud: -90.5130
+      nombre: 'María Elena',
+      apellido: 'García Morales',
+      email: 'maria.garcia@techsolutions.com',
+      telefono: '+502 5678-9012',
+      empresa: 'Tech Solutions Ltd.',
+      direccion: '7ma Calle 8-45 Zona 9',
+      ciudad: 'Guatemala',
+      departamento: 'Guatemala',
+      codigoPostal: '01009',
+      latitud: 14.6349,
+      longitud: -90.5069,
+      coordenadasMaps: '14.6349,-90.5069',
+      activo: true,
+      fechaCreacion: new Date('2024-02-01'),
+      fechaActualizacion: new Date('2024-02-01')
     },
     {
       idCliente: 3,
-      nombre: 'Global',
-      apellido: 'Corp Inc.',
-      correo: 'admin@globalcorp.com',
-      email: 'admin@globalcorp.com',
-      coordenadasMaps: '14.6200,-90.5300',
-      latitud: 14.6200,
-      longitud: -90.5300
+      nombre: 'Carlos Antonio',
+      apellido: 'Rodríguez Silva',
+      email: 'carlos.rodriguez@globalcorp.gt',
+      telefono: '+502 3456-7890',
+      empresa: 'Global Corp Guatemala',
+      direccion: '12 Calle 15-67 Zona 14',
+      ciudad: 'Guatemala',
+      departamento: 'Guatemala',
+      codigoPostal: '01014',
+      latitud: 14.5986,
+      longitud: -90.5144,
+      coordenadasMaps: '14.5986,-90.5144',
+      activo: true,
+      fechaCreacion: new Date('2024-02-15'),
+      fechaActualizacion: new Date('2024-02-15')
     },
     {
       idCliente: 4,
-      nombre: 'Innovate',
-      apellido: 'Systems',
-      correo: 'contact@innovatesys.com',
-      email: 'contact@innovatesys.com',
-      coordenadasMaps: '14.6150,-90.5200',
-      latitud: 14.6150,
-      longitud: -90.5200
+      nombre: 'Ana Lucía',
+      apellido: 'Martínez Hernández',
+      email: 'ana.martinez@innovatech.com.gt',
+      telefono: '+502 7890-1234',
+      empresa: 'Innova Tech Guatemala',
+      direccion: '3ra Avenida 9-23 Zona 1',
+      ciudad: 'Guatemala',
+      departamento: 'Guatemala',
+      codigoPostal: '01001',
+      latitud: 14.6407,
+      longitud: -90.5137,
+      coordenadasMaps: '14.6407,-90.5137',
+      activo: true,
+      fechaCreacion: new Date('2024-03-01'),
+      fechaActualizacion: new Date('2024-03-01')
+    },
+    {
+      idCliente: 5,
+      nombre: 'Luis Fernando',
+      apellido: 'Castillo Méndez',
+      email: 'luis.castillo@dataflow.gt',
+      telefono: '+502 4567-8901',
+      empresa: 'DataFlow Solutions',
+      direccion: '18 Calle 25-34 Zona 15',
+      ciudad: 'Guatemala',
+      departamento: 'Guatemala',
+      codigoPostal: '01015',
+      latitud: 14.5894,
+      longitud: -90.4896,
+      coordenadasMaps: '14.5894,-90.4896',
+      activo: true,
+      fechaCreacion: new Date('2024-03-15'),
+      fechaActualizacion: new Date('2024-03-15')
+    },
+    {
+      idCliente: 6,
+      nombre: 'Patricia Isabel',
+      apellido: 'Vásquez Torres',
+      email: 'patricia.vasquez@netcorp.com.gt',
+      telefono: '+502 6789-0123',
+      empresa: 'NetCorp Guatemala',
+      direccion: '5ta Avenida 14-78 Zona 4',
+      ciudad: 'Mixco',
+      departamento: 'Guatemala',
+      codigoPostal: '01057',
+      latitud: 14.6308,
+      longitud: -90.6067,
+      coordenadasMaps: '14.6308,-90.6067',
+      activo: true,
+      fechaCreacion: new Date('2024-04-01'),
+      fechaActualizacion: new Date('2024-04-01')
+    },
+    {
+      idCliente: 7,
+      nombre: 'Roberto Carlos',
+      apellido: 'Juárez Morales',
+      email: 'roberto.juarez@cloudtech.gt',
+      telefono: '+502 5432-1098',
+      empresa: 'CloudTech Guatemala',
+      direccion: '20 Calle 12-45 Zona 11',
+      ciudad: 'Villa Nueva',
+      departamento: 'Guatemala',
+      codigoPostal: '01011',
+      latitud: 14.5252,
+      longitud: -90.5881,
+      coordenadasMaps: '14.5252,-90.5881',
+      activo: false,
+      fechaCreacion: new Date('2024-05-01'),
+      fechaActualizacion: new Date('2024-09-15')
+    },
+    {
+      idCliente: 8,
+      nombre: 'Sofía Alejandra',
+      apellido: 'López Ramírez',
+      email: 'sofia.lopez@digitalworld.com.gt',
+      telefono: '+502 2468-1357',
+      empresa: 'Digital World GT',
+      direccion: '8va Calle 16-23 Zona 13',
+      ciudad: 'Antigua Guatemala',
+      departamento: 'Sacatepéquez',
+      codigoPostal: '03001',
+      latitud: 14.5586,
+      longitud: -90.7344,
+      coordenadasMaps: '14.5586,-90.7344',
+      activo: true,
+      fechaCreacion: new Date('2024-06-01'),
+      fechaActualizacion: new Date('2024-06-01')
     }
   ];
 
@@ -381,5 +485,134 @@ export class MockDataService {
     const today = new Date();
     const visitDate = new Date(date);
     return visitDate.toDateString() === today.toDateString();
+  }
+
+  // Métodos CRUD para clientes
+  getClientesData(filters?: ClienteFilter): Observable<Cliente[]> {
+    let filteredClientes = [...this.clientes];
+    
+    if (filters) {
+      if (filters.nombre) {
+        filteredClientes = filteredClientes.filter(c => 
+          c.nombre.toLowerCase().includes(filters.nombre!.toLowerCase()) ||
+          c.apellido.toLowerCase().includes(filters.nombre!.toLowerCase())
+        );
+      }
+      if (filters.empresa) {
+        filteredClientes = filteredClientes.filter(c => 
+          c.empresa?.toLowerCase().includes(filters.empresa!.toLowerCase())
+        );
+      }
+      if (filters.ciudad) {
+        filteredClientes = filteredClientes.filter(c => 
+          c.ciudad.toLowerCase().includes(filters.ciudad!.toLowerCase())
+        );
+      }
+      if (filters.departamento) {
+        filteredClientes = filteredClientes.filter(c => 
+          c.departamento.toLowerCase().includes(filters.departamento!.toLowerCase())
+        );
+      }
+      if (filters.activo !== undefined) {
+        filteredClientes = filteredClientes.filter(c => c.activo === filters.activo);
+      }
+    }
+    
+    return of(filteredClientes).pipe(delay(300));
+  }
+
+  getClienteById(id: number): Observable<Cliente> {
+    const cliente = this.clientes.find(c => c.idCliente === id);
+    if (!cliente) {
+      throw new Error(`Cliente con ID ${id} no encontrado`);
+    }
+    return of(cliente).pipe(delay(300));
+  }
+
+  createCliente(clienteData: ClienteCreateDTO): Observable<Cliente> {
+    const newCliente: Cliente = {
+      idCliente: Math.max(...this.clientes.map(c => c.idCliente)) + 1,
+      ...clienteData,
+      coordenadasMaps: `${clienteData.latitud},${clienteData.longitud}`,
+      activo: clienteData.activo ?? true,
+      fechaCreacion: new Date(),
+      fechaActualizacion: new Date()
+    };
+    
+    this.clientes.push(newCliente);
+    return of(newCliente).pipe(delay(300));
+  }
+
+  updateCliente(id: number, updateData: ClienteUpdateDTO): Observable<Cliente> {
+    const index = this.clientes.findIndex(c => c.idCliente === id);
+    if (index === -1) {
+      throw new Error(`Cliente con ID ${id} no encontrado`);
+    }
+    
+    // Actualizar coordenadasMaps si se cambian lat/lng
+    if (updateData.latitud !== undefined && updateData.longitud !== undefined) {
+      updateData.coordenadasMaps = `${updateData.latitud},${updateData.longitud}`;
+    }
+    
+    this.clientes[index] = {
+      ...this.clientes[index],
+      ...updateData,
+      fechaActualizacion: new Date()
+    };
+    
+    return of(this.clientes[index]).pipe(delay(300));
+  }
+
+  deleteCliente(id: number): Observable<void> {
+    const index = this.clientes.findIndex(c => c.idCliente === id);
+    if (index === -1) {
+      throw new Error(`Cliente con ID ${id} no encontrado`);
+    }
+    
+    this.clientes.splice(index, 1);
+    return of(void 0).pipe(delay(300));
+  }
+
+  toggleClienteStatus(id: number): Observable<Cliente> {
+    const cliente = this.clientes.find(c => c.idCliente === id);
+    if (!cliente) {
+      throw new Error(`Cliente con ID ${id} no encontrado`);
+    }
+    
+    cliente.activo = !cliente.activo;
+    cliente.fechaActualizacion = new Date();
+    
+    return of(cliente).pipe(delay(300));
+  }
+
+  // Métodos específicos para clientes
+  getClientesByDepartamento(departamento: string): Observable<Cliente[]> {
+    return this.getClientesData({ departamento });
+  }
+
+  getClientesActivos(): Observable<Cliente[]> {
+    return this.getClientesData({ activo: true });
+  }
+
+  searchClientesByLocation(lat: number, lng: number, radiusKm: number = 10): Observable<Cliente[]> {
+    // Filtrar clientes dentro del radio especificado
+    const filtered = this.clientes.filter(cliente => {
+      const distance = this.calculateDistance(lat, lng, cliente.latitud, cliente.longitud);
+      return distance <= radiusKm;
+    });
+    
+    return of(filtered).pipe(delay(300));
+  }
+
+  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    // Fórmula de Haversine para calcular distancia entre dos puntos
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   }
 }

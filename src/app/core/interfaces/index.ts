@@ -45,11 +45,20 @@ export interface Cliente {
   idCliente: number;
   nombre: string;
   apellido: string;
-  correo: string;
   email: string;
-  coordenadasMaps: string; // Coordenadas para Google Maps
+  telefono?: string;
+  empresa?: string;
+  direccion: string;
+  ciudad: string;
+  departamento: string;
+  codigoPostal?: string;
+  // Coordenadas para Google Maps
   latitud: number;
   longitud: number;
+  coordenadasMaps?: string; // Formato "lat,lng" para URLs
+  activo: boolean;
+  fechaCreacion: Date;
+  fechaActualizacion: Date;
   // Relaciones
   visitas?: Visita[];
 }
@@ -179,8 +188,41 @@ export interface UsuarioUpdateDTO {
 
 export interface ClienteFilter {
   nombre?: string;
-  email?: string;
   ciudad?: string;
+  departamento?: string;
+  empresa?: string;
+  activo?: boolean;
+}
+
+export interface ClienteCreateDTO {
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono?: string;
+  empresa?: string;
+  direccion: string;
+  ciudad: string;
+  departamento: string;
+  codigoPostal?: string;
+  latitud: number;
+  longitud: number;
+  activo?: boolean;
+}
+
+export interface ClienteUpdateDTO {
+  nombre?: string;
+  apellido?: string;
+  email?: string;
+  telefono?: string;
+  empresa?: string;
+  direccion?: string;
+  ciudad?: string;
+  departamento?: string;
+  codigoPostal?: string;
+  latitud?: number;
+  longitud?: number;
+  coordenadasMaps?: string;
+  activo?: boolean;
 }
 
 export interface VisitaFilter {
