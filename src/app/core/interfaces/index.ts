@@ -276,3 +276,6 @@ export interface VisitaUpdateDTO {
   estado?: EstadoVisita;
   observaciones?: string;
 }
+
+// Re-exportar interfaces de configuración
+export * from './configuracion';

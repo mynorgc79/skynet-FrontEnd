@@ -1,7 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { Usuario, Cliente, Visita, Ejecucion, UsuarioFilter, UsuarioCreateDTO, UsuarioUpdateDTO, RoleTipo, ClienteFilter, ClienteCreateDTO, ClienteUpdateDTO, VisitaFilter, VisitaCreateDTO, VisitaUpdateDTO, EstadoVisita } from '../interfaces';
+import { 
+  Usuario, Cliente, Visita, Ejecucion, 
+  UsuarioFilter, UsuarioCreateDTO, UsuarioUpdateDTO, RoleTipo, 
+  ClienteFilter, ClienteCreateDTO, ClienteUpdateDTO, 
+  VisitaFilter, VisitaCreateDTO, VisitaUpdateDTO, EstadoVisita,
+  Configuracion, ConfiguracionCreateDTO, ConfiguracionUpdateDTO, ConfiguracionFilter,
+  CategoriaConfiguracion, TipoConfiguracion, ConfiguracionesPorCategoria,
+  LogAuditoria, LogAuditoriaFilter, AccionAuditoria,
+  RespaldoSistema, RespaldoCreateDTO, RespaldoFilter, TipoRespaldo, EstadoRespaldo
+} from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -898,5 +907,740 @@ export class MockDataService {
     };
     
     return of(estadisticas).pipe(delay(300));
+  }
+
+  // ===== CONFIGURACIONES Y LOGS =====
+  
+  // Datos mock de configuraciones del sistema
+  private configuraciones: Configuracion[] = [
+    // Configuraciones generales
+    {
+      id: 1,
+      clave: 'NOMBRE_SISTEMA',
+      valor: 'Skynet Field Service',
+      categoria: CategoriaConfiguracion.GENERAL,
+      descripcion: 'Nombre del sistema que aparece en la interfaz',
+      tipo: TipoConfiguracion.TEXTO,
+      valorPorDefecto: 'Field Service System',
+      esPublica: true,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 2,
+      clave: 'VERSION',
+      valor: '1.0.0',
+      categoria: CategoriaConfiguracion.GENERAL,
+      descripcion: 'Versión actual del sistema',
+      tipo: TipoConfiguracion.TEXTO,
+      valorPorDefecto: '1.0.0',
+      esPublica: true,
+      esEditable: false,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 3,
+      clave: 'TIMEZONE',
+      valor: 'America/Guatemala',
+      categoria: CategoriaConfiguracion.GENERAL,
+      descripcion: 'Zona horaria del sistema',
+      tipo: TipoConfiguracion.TEXTO,
+      valorPorDefecto: 'America/Guatemala',
+      esPublica: true,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    
+    // Configuraciones de email
+    {
+      id: 4,
+      clave: 'SMTP_HOST',
+      valor: 'smtp.gmail.com',
+      categoria: CategoriaConfiguracion.EMAIL,
+      descripcion: 'Servidor SMTP para envío de emails',
+      tipo: TipoConfiguracion.TEXTO,
+      valorPorDefecto: 'localhost',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 5,
+      clave: 'SMTP_PORT',
+      valor: '587',
+      categoria: CategoriaConfiguracion.EMAIL,
+      descripcion: 'Puerto del servidor SMTP',
+      tipo: TipoConfiguracion.NUMERO,
+      valorPorDefecto: '587',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 6,
+      clave: 'SMTP_USER',
+      valor: 'sistema@empresa.com',
+      categoria: CategoriaConfiguracion.EMAIL,
+      descripcion: 'Usuario para autenticación SMTP',
+      tipo: TipoConfiguracion.EMAIL,
+      valorPorDefecto: '',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 7,
+      clave: 'SMTP_PASSWORD',
+      valor: 'password123',
+      categoria: CategoriaConfiguracion.EMAIL,
+      descripcion: 'Contraseña para autenticación SMTP',
+      tipo: TipoConfiguracion.PASSWORD,
+      valorPorDefecto: '',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    
+    // Configuraciones de mapas
+    {
+      id: 8,
+      clave: 'GOOGLE_MAPS_API_KEY',
+      valor: 'AIzaSyDemoKeyForDevelopment123456789',
+      categoria: CategoriaConfiguracion.MAPAS,
+      descripcion: 'API Key de Google Maps',
+      tipo: TipoConfiguracion.PASSWORD,
+      valorPorDefecto: '',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 9,
+      clave: 'MAPA_CENTRO_LAT',
+      valor: '14.634915',
+      categoria: CategoriaConfiguracion.MAPAS,
+      descripcion: 'Latitud del centro del mapa por defecto',
+      tipo: TipoConfiguracion.NUMERO,
+      valorPorDefecto: '14.634915',
+      esPublica: true,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 10,
+      clave: 'MAPA_CENTRO_LNG',
+      valor: '-90.506882',
+      categoria: CategoriaConfiguracion.MAPAS,
+      descripcion: 'Longitud del centro del mapa por defecto',
+      tipo: TipoConfiguracion.NUMERO,
+      valorPorDefecto: '-90.506882',
+      esPublica: true,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    
+    // Configuraciones de seguridad
+    {
+      id: 11,
+      clave: 'SESSION_TIMEOUT',
+      valor: '480',
+      categoria: CategoriaConfiguracion.SEGURIDAD,
+      descripcion: 'Tiempo de sesión en minutos',
+      tipo: TipoConfiguracion.NUMERO,
+      valorPorDefecto: '480',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 12,
+      clave: 'MAX_LOGIN_ATTEMPTS',
+      valor: '3',
+      categoria: CategoriaConfiguracion.SEGURIDAD,
+      descripcion: 'Máximo número de intentos de login',
+      tipo: TipoConfiguracion.NUMERO,
+      valorPorDefecto: '3',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    
+    // Configuraciones de respaldos
+    {
+      id: 13,
+      clave: 'BACKUP_ENABLED',
+      valor: 'true',
+      categoria: CategoriaConfiguracion.RESPALDOS,
+      descripcion: 'Habilitar respaldos automáticos',
+      tipo: TipoConfiguracion.BOOLEAN,
+      valorPorDefecto: 'false',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    },
+    {
+      id: 14,
+      clave: 'BACKUP_FREQUENCY',
+      valor: '24',
+      categoria: CategoriaConfiguracion.RESPALDOS,
+      descripcion: 'Frecuencia de respaldos en horas',
+      tipo: TipoConfiguracion.NUMERO,
+      valorPorDefecto: '24',
+      esPublica: false,
+      esEditable: true,
+      fechaCreacion: new Date('2024-01-01'),
+      fechaActualizacion: new Date('2024-01-01'),
+      creadoPor: 1
+    }
+  ];
+
+  // Datos mock de logs de auditoría
+  private logsAuditoria: LogAuditoria[] = [
+    {
+      id: 1,
+      entidad: 'usuario',
+      idEntidad: 1,
+      accion: AccionAuditoria.LOGIN,
+      descripcion: 'Usuario admin@test.com inició sesión',
+      direccionIP: '192.168.1.100',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      fechaCreacion: new Date('2024-10-21T08:30:00'),
+      creadoPor: 1
+    },
+    {
+      id: 2,
+      entidad: 'configuracion',
+      idEntidad: 4,
+      accion: AccionAuditoria.ACTUALIZAR,
+      valorAnterior: 'smtp.old.com',
+      valorNuevo: 'smtp.gmail.com',
+      descripcion: 'Configuración SMTP_HOST actualizada',
+      direccionIP: '192.168.1.100',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      fechaCreacion: new Date('2024-10-21T09:15:00'),
+      creadoPor: 1
+    },
+    {
+      id: 3,
+      entidad: 'cliente',
+      idEntidad: 1,
+      accion: AccionAuditoria.CREAR,
+      descripcion: 'Cliente TechCorp Guatemala creado',
+      direccionIP: '192.168.1.105',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      fechaCreacion: new Date('2024-10-21T10:00:00'),
+      creadoPor: 3
+    },
+    {
+      id: 4,
+      entidad: 'visita',
+      idEntidad: 1,
+      accion: AccionAuditoria.ACTUALIZAR,
+      valorAnterior: 'PROGRAMADA',
+      valorNuevo: 'EN_PROGRESO',
+      descripcion: 'Visita iniciada por técnico',
+      direccionIP: '192.168.1.110',
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)',
+      fechaCreacion: new Date('2024-10-21T11:30:00'),
+      creadoPor: 4
+    }
+  ];
+
+  private respaldos: RespaldoSistema[] = [
+    {
+      id: 1,
+      tipo: TipoRespaldo.COMPLETO,
+      descripcion: 'Respaldo completo automático diario',
+      rutaArchivo: '/respaldos/backup_completo_2024-12-11.tar.gz',
+      tamanoBytes: 15728640, // 15 MB
+      archivos: [
+        'database_dump.sql',
+        'configuraciones.json',
+        'usuarios.json',
+        'clientes.json',
+        'visitas.json',
+        'logs/'
+      ],
+      estado: EstadoRespaldo.COMPLETADO,
+      version: '1.0.0',
+      fechaCreacion: new Date('2024-12-11T02:00:00'),
+      fechaFinalizacion: new Date('2024-12-11T02:03:45'),
+      duracionSegundos: 225,
+      creadoPor: 1,
+      comprimido: true
+    },
+    {
+      id: 2,
+      tipo: TipoRespaldo.CONFIGURACIONES,
+      descripcion: 'Respaldo de configuraciones antes de actualización',
+      rutaArchivo: '/respaldos/backup_config_2024-12-10.json',
+      tamanoBytes: 2048576, // 2 MB
+      archivos: [
+        'configuraciones.json',
+        'settings.json'
+      ],
+      estado: EstadoRespaldo.COMPLETADO,
+      version: '1.0.0',
+      fechaCreacion: new Date('2024-12-10T15:30:00'),
+      fechaFinalizacion: new Date('2024-12-10T15:30:15'),
+      duracionSegundos: 15,
+      creadoPor: 1,
+      comprimido: false
+    },
+    {
+      id: 3,
+      tipo: TipoRespaldo.USUARIOS,
+      descripcion: 'Respaldo de usuarios antes de migración',
+      rutaArchivo: '/respaldos/backup_usuarios_2024-12-09.sql',
+      tamanoBytes: 5242880, // 5 MB
+      archivos: [
+        'usuarios.sql',
+        'roles.sql',
+        'permisos.sql'
+      ],
+      estado: EstadoRespaldo.COMPLETADO,
+      version: '1.0.0',
+      fechaCreacion: new Date('2024-12-09T10:15:00'),
+      fechaFinalizacion: new Date('2024-12-09T10:15:45'),
+      duracionSegundos: 45,
+      creadoPor: 1,
+      comprimido: true
+    },
+    {
+      id: 4,
+      tipo: TipoRespaldo.INCREMENTAL,
+      descripcion: 'Respaldo incremental - cambios últimas 24h',
+      rutaArchivo: '/respaldos/backup_incremental_2024-12-08.tar.gz',
+      tamanoBytes: 1048576, // 1 MB
+      archivos: [
+        'cambios_configuraciones.json',
+        'nuevas_visitas.json',
+        'updates.log'
+      ],
+      estado: EstadoRespaldo.COMPLETADO,
+      version: '1.0.0',
+      fechaCreacion: new Date('2024-12-08T23:45:00'),
+      fechaFinalizacion: new Date('2024-12-08T23:45:30'),
+      duracionSegundos: 30,
+      creadoPor: 1,
+      comprimido: true
+    },
+    {
+      id: 5,
+      tipo: TipoRespaldo.COMPLETO,
+      descripcion: 'Respaldo en progreso',
+      rutaArchivo: '/respaldos/backup_en_progreso_2024-12-11.tar.gz',
+      tamanoBytes: 0,
+      archivos: [],
+      estado: EstadoRespaldo.EN_PROGRESO,
+      version: '1.0.0',
+      fechaCreacion: new Date(),
+      creadoPor: 1,
+      comprimido: true
+    }
+  ];
+
+  // Métodos CRUD para configuraciones
+  getConfiguraciones(filters?: ConfiguracionFilter): Observable<Configuracion[]> {
+    let filteredConfigs = [...this.configuraciones];
+    
+    if (filters) {
+      if (filters.categoria) {
+        filteredConfigs = filteredConfigs.filter(c => c.categoria === filters.categoria);
+      }
+      if (filters.esPublica !== undefined) {
+        filteredConfigs = filteredConfigs.filter(c => c.esPublica === filters.esPublica);
+      }
+      if (filters.esEditable !== undefined) {
+        filteredConfigs = filteredConfigs.filter(c => c.esEditable === filters.esEditable);
+      }
+      if (filters.buscar) {
+        const buscar = filters.buscar.toLowerCase();
+        filteredConfigs = filteredConfigs.filter(c => 
+          c.clave.toLowerCase().includes(buscar) ||
+          c.descripcion?.toLowerCase().includes(buscar) ||
+          c.valor.toLowerCase().includes(buscar)
+        );
+      }
+    }
+    
+    return of(filteredConfigs).pipe(delay(300));
+  }
+
+  getConfiguracionById(id: number): Observable<Configuracion> {
+    const config = this.configuraciones.find(c => c.id === id);
+    if (!config) {
+      throw new Error(`Configuración con ID ${id} no encontrada`);
+    }
+    return of(config).pipe(delay(300));
+  }
+
+  createConfiguracion(configData: ConfiguracionCreateDTO): Observable<Configuracion> {
+    const newConfig: Configuracion = {
+      id: Math.max(...this.configuraciones.map(c => c.id)) + 1,
+      ...configData,
+      esPublica: configData.esPublica ?? false,
+      esEditable: configData.esEditable ?? true,
+      fechaCreacion: new Date(),
+      fechaActualizacion: new Date(),
+      creadoPor: 1, // Usuario actual
+      modificadoPor: undefined
+    };
+    
+    this.configuraciones.push(newConfig);
+    return of(newConfig).pipe(delay(300));
+  }
+
+  updateConfiguracion(id: number, updateData: ConfiguracionUpdateDTO): Observable<Configuracion> {
+    const index = this.configuraciones.findIndex(c => c.id === id);
+    if (index === -1) {
+      throw new Error(`Configuración con ID ${id} no encontrada`);
+    }
+    
+    this.configuraciones[index] = {
+      ...this.configuraciones[index],
+      ...updateData,
+      fechaActualizacion: new Date(),
+      modificadoPor: 1 // Usuario actual
+    };
+    
+    return of(this.configuraciones[index]).pipe(delay(300));
+  }
+
+  deleteConfiguracion(id: number): Observable<void> {
+    const index = this.configuraciones.findIndex(c => c.id === id);
+    if (index === -1) {
+      throw new Error(`Configuración con ID ${id} no encontrada`);
+    }
+    
+    this.configuraciones.splice(index, 1);
+    return of(void 0).pipe(delay(300));
+  }
+
+  getConfiguracionesPorCategoria(): Observable<ConfiguracionesPorCategoria[]> {
+    const categorias = Object.values(CategoriaConfiguracion);
+    const result: ConfiguracionesPorCategoria[] = categorias.map(categoria => ({
+      categoria,
+      configuraciones: this.configuraciones.filter(c => c.categoria === categoria),
+      descripcion: this.getCategoriaDescripcion(categoria),
+      icono: this.getCategoriaIcono(categoria)
+    }));
+    
+    return of(result).pipe(delay(300));
+  }
+
+  getConfiguracionValor(clave: string): Observable<string | null> {
+    const config = this.configuraciones.find(c => c.clave === clave);
+    return of(config ? config.valor : null).pipe(delay(100));
+  }
+
+  setConfiguracionValor(clave: string, valor: string): Observable<void> {
+    const config = this.configuraciones.find(c => c.clave === clave);
+    if (config) {
+      config.valor = valor;
+      config.fechaActualizacion = new Date();
+      config.modificadoPor = 1;
+    }
+    return of(void 0).pipe(delay(300));
+  }
+
+  // Configuraciones específicas agrupadas
+  getConfiguracionEmail(): Observable<any> {
+    const emailConfigs = this.configuraciones.filter(c => c.categoria === CategoriaConfiguracion.EMAIL);
+    const config = {
+      smtpHost: emailConfigs.find(c => c.clave === 'SMTP_HOST')?.valor || '',
+      smtpPort: parseInt(emailConfigs.find(c => c.clave === 'SMTP_PORT')?.valor || '587'),
+      smtpUsuario: emailConfigs.find(c => c.clave === 'SMTP_USER')?.valor || '',
+      smtpPassword: emailConfigs.find(c => c.clave === 'SMTP_PASSWORD')?.valor || '',
+      smtpSeguro: true,
+      emailRemitente: emailConfigs.find(c => c.clave === 'SMTP_USER')?.valor || '',
+      nombreRemitente: 'Sistema Skynet'
+    };
+    return of(config).pipe(delay(300));
+  }
+
+  getConfiguracionMapas(): Observable<any> {
+    const mapasConfigs = this.configuraciones.filter(c => c.categoria === CategoriaConfiguracion.MAPAS);
+    const config = {
+      googleMapsApiKey: mapasConfigs.find(c => c.clave === 'GOOGLE_MAPS_API_KEY')?.valor || '',
+      centroLatitud: parseFloat(mapasConfigs.find(c => c.clave === 'MAPA_CENTRO_LAT')?.valor || '14.634915'),
+      centroLongitud: parseFloat(mapasConfigs.find(c => c.clave === 'MAPA_CENTRO_LNG')?.valor || '-90.506882'),
+      zoomPorDefecto: 12,
+      mostrarTrafico: true,
+      tipoMapa: 'roadmap'
+    };
+    return of(config).pipe(delay(300));
+  }
+
+  getConfiguracionRespaldos(): Observable<any> {
+    const respaldosConfigs = this.configuraciones.filter(c => c.categoria === CategoriaConfiguracion.RESPALDOS);
+    const config = {
+      frecuenciaHoras: parseInt(respaldosConfigs.find(c => c.clave === 'BACKUP_FREQUENCY')?.valor || '24'),
+      rutaRespaldos: '/var/backups/skynet',
+      manenerDias: 30,
+      incluirArchivos: true,
+      emailNotificacion: 'admin@empresa.com',
+      habilitado: respaldosConfigs.find(c => c.clave === 'BACKUP_ENABLED')?.valor === 'true'
+    };
+    return of(config).pipe(delay(300));
+  }
+
+  getConfiguracionSeguridad(): Observable<any> {
+    const seguridadConfigs = this.configuraciones.filter(c => c.categoria === CategoriaConfiguracion.SEGURIDAD);
+    const config = {
+      tiempoSesionMinutos: parseInt(seguridadConfigs.find(c => c.clave === 'SESSION_TIMEOUT')?.valor || '480'),
+      intentosLoginMaximo: parseInt(seguridadConfigs.find(c => c.clave === 'MAX_LOGIN_ATTEMPTS')?.valor || '3'),
+      tiempoBloqueoMinutos: 15,
+      longitudMinimaPassword: 8,
+      requiereCaracteresEspeciales: true,
+      requiereNumeros: true,
+      requiereMayusculas: true,
+      caducidadPasswordDias: 90
+    };
+    return of(config).pipe(delay(300));
+  }
+
+  // Logs de auditoría
+  getLogsAuditoria(filters?: LogAuditoriaFilter): Observable<LogAuditoria[]> {
+    let filteredLogs = [...this.logsAuditoria];
+    
+    if (filters) {
+      if (filters.entidad) {
+        filteredLogs = filteredLogs.filter(l => l.entidad === filters.entidad);
+      }
+      if (filters.accion) {
+        filteredLogs = filteredLogs.filter(l => l.accion === filters.accion);
+      }
+      if (filters.usuario) {
+        filteredLogs = filteredLogs.filter(l => l.creadoPor === filters.usuario);
+      }
+      if (filters.fechaDesde) {
+        filteredLogs = filteredLogs.filter(l => new Date(l.fechaCreacion) >= new Date(filters.fechaDesde!));
+      }
+      if (filters.fechaHasta) {
+        filteredLogs = filteredLogs.filter(l => new Date(l.fechaCreacion) <= new Date(filters.fechaHasta!));
+      }
+    }
+    
+    // Ordenar por fecha descendente
+    filteredLogs.sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime());
+    
+    return of(filteredLogs).pipe(delay(300));
+  }
+
+  createLogAuditoria(logData: Partial<LogAuditoria>): Observable<LogAuditoria> {
+    const newLog: LogAuditoria = {
+      id: Math.max(...this.logsAuditoria.map(l => l.id)) + 1,
+      entidad: logData.entidad || '',
+      idEntidad: logData.idEntidad || 0,
+      accion: logData.accion || AccionAuditoria.ACTUALIZAR,
+      descripcion: logData.descripcion || '',
+      direccionIP: logData.direccionIP || '192.168.1.1',
+      userAgent: logData.userAgent || 'Unknown',
+      fechaCreacion: new Date(),
+      creadoPor: logData.creadoPor || 1,
+      valorAnterior: logData.valorAnterior,
+      valorNuevo: logData.valorNuevo
+    };
+    
+    this.logsAuditoria.push(newLog);
+    return of(newLog).pipe(delay(300));
+  }
+
+  // Operaciones de respaldo
+  ejecutarRespaldo(): Observable<any> {
+    const resultado = {
+      exito: true,
+      mensaje: 'Respaldo ejecutado correctamente',
+      archivo: `backup_${new Date().toISOString().slice(0, 10)}_${Date.now()}.sql`,
+      tamaño: '2.5 MB',
+      fecha: new Date()
+    };
+    return of(resultado).pipe(delay(2000)); // Simular tiempo de ejecución
+  }
+
+  getRespaldos(filters?: RespaldoFilter): Observable<RespaldoSistema[]> {
+    let filteredRespaldos = [...this.respaldos];
+    
+    if (filters) {
+      if (filters.tipo) {
+        filteredRespaldos = filteredRespaldos.filter(r => r.tipo === filters.tipo);
+      }
+      if (filters.estado) {
+        filteredRespaldos = filteredRespaldos.filter(r => r.estado === filters.estado);
+      }
+      if (filters.fechaDesde) {
+        filteredRespaldos = filteredRespaldos.filter(r => 
+          new Date(r.fechaCreacion) >= filters.fechaDesde!
+        );
+      }
+      if (filters.fechaHasta) {
+        filteredRespaldos = filteredRespaldos.filter(r => 
+          new Date(r.fechaCreacion) <= filters.fechaHasta!
+        );
+      }
+    }
+    
+    return of(filteredRespaldos).pipe(delay(300));
+  }
+
+  crearRespaldo(respaldoData: RespaldoCreateDTO): Observable<RespaldoSistema> {
+    const newRespaldo: RespaldoSistema = {
+      id: Math.max(...this.respaldos.map(r => r.id)) + 1,
+      tipo: respaldoData.tipo,
+      descripcion: respaldoData.descripcion || `Respaldo ${respaldoData.tipo} - ${new Date().toLocaleString('es-ES')}`,
+      rutaArchivo: `/respaldos/backup_${respaldoData.tipo.toLowerCase()}_${Date.now()}.${respaldoData.comprimido ? 'tar.gz' : 'sql'}`,
+      tamanoBytes: 0,
+      archivos: [],
+      estado: EstadoRespaldo.EN_PROGRESO,
+      version: '1.0.0',
+      fechaCreacion: new Date(),
+      creadoPor: 1, // Usuario actual
+      comprimido: respaldoData.comprimido ?? true
+    };
+
+    this.respaldos.push(newRespaldo);
+
+    // Simular finalización del respaldo después de un tiempo
+    setTimeout(() => {
+      const respaldo = this.respaldos.find(r => r.id === newRespaldo.id);
+      if (respaldo) {
+        respaldo.estado = EstadoRespaldo.COMPLETADO;
+        respaldo.fechaFinalizacion = new Date();
+        respaldo.duracionSegundos = Math.floor(Math.random() * 300) + 30; // 30-330 segundos
+        respaldo.tamanoBytes = Math.floor(Math.random() * 20971520) + 1048576; // 1-21 MB
+        
+        // Simular archivos según el tipo
+        switch (respaldo.tipo) {
+          case TipoRespaldo.COMPLETO:
+            respaldo.archivos = ['database_dump.sql', 'configuraciones.json', 'usuarios.json', 'clientes.json', 'visitas.json', 'logs/'];
+            break;
+          case TipoRespaldo.CONFIGURACIONES:
+            respaldo.archivos = ['configuraciones.json', 'settings.json'];
+            break;
+          case TipoRespaldo.USUARIOS:
+            respaldo.archivos = ['usuarios.sql', 'roles.sql', 'permisos.sql'];
+            break;
+          case TipoRespaldo.CLIENTES:
+            respaldo.archivos = ['clientes.sql', 'direcciones.sql'];
+            break;
+          case TipoRespaldo.INCREMENTAL:
+            respaldo.archivos = ['cambios.json', 'updates.log'];
+            break;
+        }
+      }
+    }, 5000); // 5 segundos para completar
+
+    return of(newRespaldo).pipe(delay(500));
+  }
+
+  eliminarRespaldo(id: number): Observable<void> {
+    const index = this.respaldos.findIndex(r => r.id === id);
+    if (index === -1) {
+      throw new Error(`Respaldo con ID ${id} no encontrado`);
+    }
+    
+    this.respaldos.splice(index, 1);
+    return of(void 0).pipe(delay(300));
+  }
+
+  restaurarRespaldo(id: number): Observable<{ exito: boolean; mensaje: string }> {
+    const respaldo = this.respaldos.find(r => r.id === id);
+    if (!respaldo) {
+      throw new Error(`Respaldo con ID ${id} no encontrado`);
+    }
+
+    if (respaldo.estado !== EstadoRespaldo.COMPLETADO) {
+      return of({
+        exito: false,
+        mensaje: 'Solo se pueden restaurar respaldos completados'
+      }).pipe(delay(500));
+    }
+
+    // Simular proceso de restauración
+    const exito = Math.random() > 0.1; // 90% de éxito
+    return of({
+      exito,
+      mensaje: exito 
+        ? `Restauración completada exitosamente desde respaldo ${respaldo.tipo}`
+        : 'Error durante la restauración. Verifique la integridad del archivo.'
+    }).pipe(delay(3000)); // Simular tiempo de restauración
+  }
+
+  descargarRespaldo(id: number): Observable<Blob> {
+    // Simular descarga de archivo
+    const content = `-- Respaldo de base de datos ID: ${id}\n-- Fecha: ${new Date().toISOString()}\n-- Contenido simulado`;
+    const blob = new Blob([content], { type: 'application/sql' });
+    return of(blob).pipe(delay(1000));
+  }
+
+  // Pruebas de configuración
+  probarConfiguracionEmail(): Observable<{ exito: boolean; mensaje: string }> {
+    // Simular prueba de email
+    const exito = Math.random() > 0.3; // 70% de éxito
+    return of({
+      exito,
+      mensaje: exito ? 'Configuración de email válida. Email de prueba enviado.' : 'Error: No se pudo conectar al servidor SMTP.'
+    }).pipe(delay(2000));
+  }
+
+  probarConfiguracionMapas(): Observable<{ exito: boolean; mensaje: string }> {
+    // Simular prueba de Google Maps API
+    const exito = Math.random() > 0.2; // 80% de éxito
+    return of({
+      exito,
+      mensaje: exito ? 'API Key de Google Maps válida.' : 'Error: API Key inválida o sin permisos.'
+    }).pipe(delay(1500));
+  }
+
+  // Métodos auxiliares
+  private getCategoriaDescripcion(categoria: CategoriaConfiguracion): string {
+    const descripciones = {
+      [CategoriaConfiguracion.GENERAL]: 'Configuraciones generales del sistema',
+      [CategoriaConfiguracion.EMAIL]: 'Configuraciones de correo electrónico y SMTP',
+      [CategoriaConfiguracion.MAPAS]: 'Configuraciones de Google Maps y geolocalización',
+      [CategoriaConfiguracion.RESPALDOS]: 'Configuraciones de respaldos automáticos',
+      [CategoriaConfiguracion.SEGURIDAD]: 'Configuraciones de seguridad y autenticación',
+      [CategoriaConfiguracion.NOTIFICACIONES]: 'Configuraciones de notificaciones del sistema'
+    };
+    return descripciones[categoria] || '';
+  }
+
+  private getCategoriaIcono(categoria: CategoriaConfiguracion): string {
+    const iconos = {
+      [CategoriaConfiguracion.GENERAL]: 'fas fa-cogs',
+      [CategoriaConfiguracion.EMAIL]: 'fas fa-envelope',
+      [CategoriaConfiguracion.MAPAS]: 'fas fa-map',
+      [CategoriaConfiguracion.RESPALDOS]: 'fas fa-database',
+      [CategoriaConfiguracion.SEGURIDAD]: 'fas fa-shield-alt',
+      [CategoriaConfiguracion.NOTIFICACIONES]: 'fas fa-bell'
+    };
+    return iconos[categoria] || 'fas fa-cog';
   }
 }
