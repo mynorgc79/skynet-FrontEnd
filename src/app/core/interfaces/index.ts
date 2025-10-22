@@ -66,17 +66,29 @@ export interface Cliente {
 export interface Visita {
   idVisita: number;
   idCliente: number;
-  idSupervisor: number;
-  idTecnico: number;
-  fechaVisita: Date;
+  idTecnico?: number;
+  idSupervisor?: number;
   motivo: string;
-  estado: string; // PROGRAMADA, EN_PROGRESO, COMPLETADA, CANCELADA
+  descripcion?: string;
+  fechaVisita: Date;
+  horaEstimada?: string; // formato HH:mm
+  duracionEstimada?: number; // en minutos
+  direccion?: string;
+  latitud?: number;
+  longitud?: number;
+  estado: EstadoVisita;
+  prioridad: 'URGENTE' | 'ALTA' | 'MEDIA' | 'BAJA';
+  horaInicio?: string | Date;
+  horaFin?: string | Date;
+  observaciones?: string;
+  motivoCancelacion?: string;
+  fechaCreacion: Date;
+  fechaActualizacion: Date;
+  
   // Relaciones
   cliente?: Cliente;
-  supervisor?: Usuario;
   tecnico?: Usuario;
-  ejecuciones?: Ejecucion[];
-  reporte?: Reporte;
+  supervisor?: Usuario;
 }
 
 export interface Ejecucion {
@@ -229,7 +241,38 @@ export interface VisitaFilter {
   fechaDesde?: Date;
   fechaHasta?: Date;
   estado?: EstadoVisita;
+  prioridad?: 'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE';
   idTecnico?: number;
   idSupervisor?: number;
   idCliente?: number;
+}
+
+export interface VisitaCreateDTO {
+  idCliente: number;
+  idTecnico?: number;
+  idSupervisor?: number;
+  motivo: string;
+  descripcion?: string;
+  fechaVisita: Date;
+  horaEstimada?: string;
+  duracionEstimada?: number;
+  direccion?: string;
+  latitud?: number;
+  longitud?: number;
+  prioridad: 'URGENTE' | 'ALTA' | 'MEDIA' | 'BAJA';
+}
+
+export interface VisitaUpdateDTO {
+  motivo?: string;
+  descripcion?: string;
+  fechaVisita?: Date;
+  horaEstimada?: string;
+  duracionEstimada?: number;
+  direccion?: string;
+  latitud?: number;
+  longitud?: number;
+  prioridad?: 'URGENTE' | 'ALTA' | 'MEDIA' | 'BAJA';
+  idTecnico?: number;
+  estado?: EstadoVisita;
+  observaciones?: string;
 }

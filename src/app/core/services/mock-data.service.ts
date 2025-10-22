@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { Usuario, Cliente, Visita, Ejecucion, UsuarioFilter, UsuarioCreateDTO, UsuarioUpdateDTO, RoleTipo, ClienteFilter, ClienteCreateDTO, ClienteUpdateDTO } from '../interfaces';
+import { Usuario, Cliente, Visita, Ejecucion, UsuarioFilter, UsuarioCreateDTO, UsuarioUpdateDTO, RoleTipo, ClienteFilter, ClienteCreateDTO, ClienteUpdateDTO, VisitaFilter, VisitaCreateDTO, VisitaUpdateDTO, EstadoVisita } from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -245,45 +245,136 @@ export class MockDataService {
       idCliente: 1,
       idSupervisor: 2,
       idTecnico: 3,
-      fechaVisita: new Date('2024-10-19T09:00:00'),
+      fechaVisita: new Date('2024-10-21'),
+      horaInicio: '09:00',
+      horaFin: '11:30',
       motivo: 'Mantenimiento preventivo de equipos',
-      estado: 'COMPLETADA'
+      descripcion: 'Revisión general de servidores, actualización de sistemas y limpieza de equipos',
+      prioridad: 'MEDIA',
+      estado: 'COMPLETADA' as any,
+      observaciones: 'Mantenimiento completado satisfactoriamente. Se recomienda próxima revisión en 3 meses.',
+      duracionEstimada: 150,
+      fechaCreacion: new Date('2024-10-15'),
+      fechaActualizacion: new Date('2024-10-21')
     },
     {
       idVisita: 2,
       idCliente: 2,
       idSupervisor: 2,
-      idTecnico: 4,
-      fechaVisita: new Date('2024-10-19T11:00:00'),
+      idTecnico: 5,
+      fechaVisita: new Date('2024-10-21'),
+      horaInicio: '11:00',
+      horaFin: undefined,
       motivo: 'Instalación de nuevo servidor',
-      estado: 'EN_PROGRESO'
+      descripcion: 'Instalación y configuración del nuevo servidor Dell PowerEdge',
+      prioridad: 'ALTA',
+      estado: 'EN_PROGRESO' as any,
+      observaciones: 'Instalación en progreso, estimado de finalización: 15:00',
+      duracionEstimada: 240,
+      fechaCreacion: new Date('2024-10-16'),
+      fechaActualizacion: new Date('2024-10-21')
     },
     {
       idVisita: 3,
       idCliente: 3,
       idSupervisor: 2,
       idTecnico: 3,
-      fechaVisita: new Date('2024-10-19T14:00:00'),
+      fechaVisita: new Date('2024-10-21'),
+      horaInicio: '14:00',
+      horaFin: undefined,
       motivo: 'Soporte técnico urgente',
-      estado: 'PROGRAMADA'
+      descripcion: 'Resolución de problemas críticos en el sistema de facturación',
+      prioridad: 'URGENTE',
+      estado: 'PROGRAMADA' as any,
+      observaciones: 'Cliente reporta sistema caído desde las 12:00. Prioridad máxima.',
+      duracionEstimada: 120,
+      fechaCreacion: new Date('2024-10-21'),
+      fechaActualizacion: new Date('2024-10-21')
     },
     {
       idVisita: 4,
       idCliente: 4,
-      idSupervisor: 2,
-      idTecnico: 5,
-      fechaVisita: new Date('2024-10-19T16:00:00'),
+      idSupervisor: 4,
+      idTecnico: 6,
+      fechaVisita: new Date('2024-10-22'),
+      horaInicio: '10:00',
+      horaFin: undefined,
       motivo: 'Actualización de software',
-      estado: 'PROGRAMADA'
+      descripcion: 'Actualización del sistema ERP a la versión más reciente',
+      prioridad: 'MEDIA',
+      estado: 'PROGRAMADA' as any,
+      observaciones: 'Requiere backup completo antes de la actualización',
+      duracionEstimada: 180,
+      fechaCreacion: new Date('2024-10-17'),
+      fechaActualizacion: new Date('2024-10-17')
     },
     {
       idVisita: 5,
+      idCliente: 5,
+      idSupervisor: 2,
+      idTecnico: 5,
+      fechaVisita: new Date('2024-10-22'),
+      horaInicio: '08:30',
+      horaFin: undefined,
+      motivo: 'Capacitación de usuarios',
+      descripcion: 'Capacitación del personal en el uso del nuevo sistema',
+      prioridad: 'BAJA',
+      estado: 'PROGRAMADA' as any,
+      observaciones: 'Sesión de capacitación para 8 usuarios',
+      duracionEstimada: 120,
+      fechaCreacion: new Date('2024-10-18'),
+      fechaActualizacion: new Date('2024-10-18')
+    },
+    {
+      idVisita: 6,
+      idCliente: 6,
+      idSupervisor: 4,
+      idTecnico: 6,
+      fechaVisita: new Date('2024-10-23'),
+      horaInicio: '09:30',
+      horaFin: undefined,
+      motivo: 'Instalación de equipos nuevos',
+      descripcion: 'Instalación de 5 computadoras nuevas y configuración de red',
+      prioridad: 'MEDIA',
+      estado: 'PROGRAMADA' as any,
+      observaciones: 'Equipos ya están en las instalaciones del cliente',
+      duracionEstimada: 200,
+      fechaCreacion: new Date('2024-10-19'),
+      fechaActualizacion: new Date('2024-10-19')
+    },
+    {
+      idVisita: 7,
       idCliente: 1,
       idSupervisor: 2,
-      idTecnico: 4,
-      fechaVisita: new Date('2024-10-20T10:00:00'),
-      motivo: 'Revisión mensual',
-      estado: 'PROGRAMADA'
+      idTecnico: 3,
+      fechaVisita: new Date('2024-10-18'),
+      horaInicio: '16:00',
+      horaFin: '17:15',
+      motivo: 'Backup de seguridad',
+      descripcion: 'Verificación y actualización del sistema de backup automático',
+      prioridad: 'MEDIA',
+      estado: 'COMPLETADA' as any,
+      observaciones: 'Backup funcionando correctamente. Se configuró frecuencia diaria.',
+      duracionEstimada: 75,
+      fechaCreacion: new Date('2024-10-14'),
+      fechaActualizacion: new Date('2024-10-18')
+    },
+    {
+      idVisita: 8,
+      idCliente: 8,
+      idSupervisor: 4,
+      idTecnico: 6,
+      fechaVisita: new Date('2024-10-17'),
+      horaInicio: '13:00',
+      horaFin: '13:45',
+      motivo: 'Consultoría técnica',
+      descripcion: 'Evaluación de infraestructura actual y recomendaciones de mejora',
+      prioridad: 'BAJA',
+      estado: 'COMPLETADA' as any,
+      observaciones: 'Se entregó reporte con recomendaciones de mejora.',
+      duracionEstimada: 60,
+      fechaCreacion: new Date('2024-10-12'),
+      fechaActualizacion: new Date('2024-10-17')
     }
   ];
 
@@ -614,5 +705,198 @@ export class MockDataService {
               Math.sin(dLng/2) * Math.sin(dLng/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
+  }
+
+  // Métodos CRUD para visitas
+  getVisitasData(filters?: VisitaFilter): Observable<Visita[]> {
+    let filteredVisitas = [...this.visitas];
+    
+    if (filters) {
+      if (filters.fechaDesde) {
+        filteredVisitas = filteredVisitas.filter(v => 
+          new Date(v.fechaVisita) >= new Date(filters.fechaDesde!)
+        );
+      }
+      if (filters.fechaHasta) {
+        filteredVisitas = filteredVisitas.filter(v => 
+          new Date(v.fechaVisita) <= new Date(filters.fechaHasta!)
+        );
+      }
+      if (filters.estado) {
+        filteredVisitas = filteredVisitas.filter(v => v.estado === filters.estado);
+      }
+      if (filters.prioridad) {
+        filteredVisitas = filteredVisitas.filter(v => v.prioridad === filters.prioridad);
+      }
+      if (filters.idTecnico) {
+        filteredVisitas = filteredVisitas.filter(v => v.idTecnico === filters.idTecnico);
+      }
+      if (filters.idSupervisor) {
+        filteredVisitas = filteredVisitas.filter(v => v.idSupervisor === filters.idSupervisor);
+      }
+      if (filters.idCliente) {
+        filteredVisitas = filteredVisitas.filter(v => v.idCliente === filters.idCliente);
+      }
+    }
+    
+    // Ordenar por fecha de visita
+    filteredVisitas.sort((a, b) => new Date(a.fechaVisita).getTime() - new Date(b.fechaVisita).getTime());
+    
+    return of(filteredVisitas).pipe(delay(300));
+  }
+
+  getVisitaById(id: number): Observable<Visita> {
+    const visita = this.visitas.find(v => v.idVisita === id);
+    if (!visita) {
+      throw new Error(`Visita con ID ${id} no encontrada`);
+    }
+    
+    // Agregar datos relacionados
+    const visitaCompleta = {
+      ...visita,
+      cliente: this.clientes.find(c => c.idCliente === visita.idCliente),
+      supervisor: this.usuarios.find(u => u.idUsuario === visita.idSupervisor),
+      tecnico: this.usuarios.find(u => u.idUsuario === visita.idTecnico)
+    };
+    
+    return of(visitaCompleta).pipe(delay(300));
+  }
+
+  createVisita(visitaData: VisitaCreateDTO): Observable<Visita> {
+    const newVisita: Visita = {
+      idVisita: Math.max(...this.visitas.map(v => v.idVisita)) + 1,
+      ...visitaData,
+      estado: EstadoVisita.PROGRAMADA,
+      fechaCreacion: new Date(),
+      fechaActualizacion: new Date()
+    };
+    
+    this.visitas.push(newVisita);
+    return of(newVisita).pipe(delay(300));
+  }
+
+  updateVisita(id: number, updateData: VisitaUpdateDTO): Observable<Visita> {
+    const index = this.visitas.findIndex(v => v.idVisita === id);
+    if (index === -1) {
+      throw new Error(`Visita con ID ${id} no encontrada`);
+    }
+    
+    this.visitas[index] = {
+      ...this.visitas[index],
+      ...updateData,
+      fechaActualizacion: new Date()
+    };
+    
+    return of(this.visitas[index]).pipe(delay(300));
+  }
+
+  deleteVisita(id: number): Observable<void> {
+    const index = this.visitas.findIndex(v => v.idVisita === id);
+    if (index === -1) {
+      throw new Error(`Visita con ID ${id} no encontrada`);
+    }
+    
+    this.visitas.splice(index, 1);
+    return of(void 0).pipe(delay(300));
+  }
+
+  // Métodos específicos para visitas
+  iniciarVisita(id: number): Observable<Visita> {
+    const visita = this.visitas.find(v => v.idVisita === id);
+    if (!visita) {
+      throw new Error(`Visita con ID ${id} no encontrada`);
+    }
+    
+    if (visita.estado !== EstadoVisita.PROGRAMADA) {
+      throw new Error('Solo se pueden iniciar visitas programadas');
+    }
+    
+    visita.estado = EstadoVisita.EN_PROGRESO;
+    visita.fechaActualizacion = new Date();
+    
+    return of(visita).pipe(delay(300));
+  }
+
+  completarVisita(id: number, observaciones?: string): Observable<Visita> {
+    const visita = this.visitas.find(v => v.idVisita === id);
+    if (!visita) {
+      throw new Error(`Visita con ID ${id} no encontrada`);
+    }
+    
+    if (visita.estado !== EstadoVisita.EN_PROGRESO) {
+      throw new Error('Solo se pueden completar visitas en progreso');
+    }
+    
+    visita.estado = EstadoVisita.COMPLETADA;
+    visita.horaFin = new Date().toTimeString().slice(0, 5);
+    if (observaciones) {
+      visita.observaciones = observaciones;
+    }
+    visita.fechaActualizacion = new Date();
+    
+    return of(visita).pipe(delay(300));
+  }
+
+  cancelarVisita(id: number, motivo?: string): Observable<Visita> {
+    const visita = this.visitas.find(v => v.idVisita === id);
+    if (!visita) {
+      throw new Error(`Visita con ID ${id} no encontrada`);
+    }
+    
+    if (visita.estado === EstadoVisita.COMPLETADA) {
+      throw new Error('No se pueden cancelar visitas completadas');
+    }
+    
+    visita.estado = EstadoVisita.CANCELADA;
+    if (motivo) {
+      visita.observaciones = `Cancelada: ${motivo}`;
+    }
+    visita.fechaActualizacion = new Date();
+    
+    return of(visita).pipe(delay(300));
+  }
+
+  
+
+  getVisitasBySupervisor(supervisorId: number): Observable<Visita[]> {
+    return this.getVisitasData({ idSupervisor: supervisorId });
+  }
+
+  getVisitasByCliente(clienteId: number): Observable<Visita[]> {
+    return this.getVisitasData({ idCliente: clienteId });
+  }
+
+  getVisitasHoy(): Observable<Visita[]> {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const manana = new Date(hoy);
+    manana.setDate(manana.getDate() + 1);
+    
+    return this.getVisitasData({
+      fechaDesde: hoy,
+      fechaHasta: manana
+    });
+  }
+
+  getVisitasPorEstado(estado: EstadoVisita): Observable<Visita[]> {
+    return this.getVisitasData({ estado });
+  }
+
+  getEstadisticasVisitas(): Observable<any> {
+    const estadisticas = {
+      total: this.visitas.length,
+      programadas: this.visitas.filter(v => v.estado === EstadoVisita.PROGRAMADA).length,
+      enProgreso: this.visitas.filter(v => v.estado === EstadoVisita.EN_PROGRESO).length,
+      completadas: this.visitas.filter(v => v.estado === EstadoVisita.COMPLETADA).length,
+      canceladas: this.visitas.filter(v => v.estado === EstadoVisita.CANCELADA).length,
+      porPrioridad: {
+        urgente: this.visitas.filter(v => v.prioridad === 'URGENTE').length,
+        alta: this.visitas.filter(v => v.prioridad === 'ALTA').length,
+        media: this.visitas.filter(v => v.prioridad === 'MEDIA').length,
+        baja: this.visitas.filter(v => v.prioridad === 'BAJA').length
+      }
+    };
+    
+    return of(estadisticas).pipe(delay(300));
   }
 }

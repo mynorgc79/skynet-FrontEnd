@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from './base-api.service';
+import { MockDataService } from './mock-data.service';
 import { Usuario, CreateUsuarioDto, UsuarioFilter, ApiResponse, PaginatedResponse } from '../interfaces';
 
 @Injectable({
@@ -9,6 +10,7 @@ import { Usuario, CreateUsuarioDto, UsuarioFilter, ApiResponse, PaginatedRespons
 export class UsuarioService extends BaseApiService {
 
   private endpoint = '/usuarios';
+  private mockDataService = new MockDataService();
 
   // Obtener todos los usuarios con filtros y paginación
   getUsuarios(page: number = 1, limit: number = 10, filter?: UsuarioFilter): Observable<PaginatedResponse<Usuario>> {
@@ -68,5 +70,12 @@ export class UsuarioService extends BaseApiService {
   // Cambiar contraseña
   changePassword(id: number, newPassword: string): Observable<ApiResponse<any>> {
     return this.patch<any>(`${this.endpoint}/${id}/change-password`, { password: newPassword });
+  }
+
+  // Métodos temporales con mock data para desarrollo
+  getByRol(rol: string): Observable<Usuario[]> {
+    return this.mockDataService.getUsuarios().pipe(
+      map((usuarios: Usuario[]) => usuarios.filter((usuario: Usuario) => usuario.rol === rol))
+    );
   }
 }
