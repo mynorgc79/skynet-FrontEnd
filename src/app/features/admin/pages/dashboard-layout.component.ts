@@ -146,7 +146,7 @@ export class DashboardLayoutComponent implements OnInit {
       case 'TECNICO':
         this.menuItems = [
           ...baseMenuItems,
-          { label: 'Mis Visitas', route: '/dashboard/mis-visitas', icon: 'fas fa-calendar-day', roles: ['TECNICO'] },
+          { label: 'Mis Visitas', route: '/dashboard/visitas', icon: 'fas fa-calendar-day', roles: ['TECNICO'] },
           { label: 'Clientes', route: '/dashboard/clientes', icon: 'fas fa-building', roles: ['TECNICO'] },
           { label: 'Mi Perfil', route: '/dashboard/perfil', icon: 'fas fa-user', roles: ['TECNICO'] }
         ];

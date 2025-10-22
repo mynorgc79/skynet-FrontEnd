@@ -21,10 +21,10 @@ const routes: Routes = [
         path: 'clientes',
         loadChildren: () => import('../clientes/clientes.module').then(m => m.ClientesModule)
       },
-      // {
-      //   path: 'visitas',
-      //   loadChildren: () => import('./modules/visitas/visitas.module').then(m => m.VisitasModule)
-      // }
+      {
+        path: 'visitas',
+        loadChildren: () => import('../visitas/visitas.module').then(m => m.VisitasModule)
+      }
     ]
   }
 ];
