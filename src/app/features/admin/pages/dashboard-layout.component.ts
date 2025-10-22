@@ -129,7 +129,7 @@ export class DashboardLayoutComponent implements OnInit {
           { label: 'Clientes', route: '/dashboard/clientes', icon: 'fas fa-building', roles: ['ADMINISTRADOR', 'SUPERVISOR'] },
           { label: 'Visitas', route: '/dashboard/visitas', icon: 'fas fa-calendar-check', roles: ['ADMINISTRADOR', 'SUPERVISOR', 'TECNICO'] },
           { label: 'Reportes', route: '/dashboard/reportes', icon: 'fas fa-chart-bar', roles: ['ADMINISTRADOR', 'SUPERVISOR'] },
-          { label: 'Configuración', route: '/dashboard/configuracion', icon: 'fas fa-cogs', roles: ['ADMINISTRADOR'] }
+          { label: 'Configuraciones', route: '/dashboard/configuraciones', icon: 'fas fa-cogs', roles: ['ADMINISTRADOR'] }
         ];
         break;
         

@@ -24,6 +24,10 @@ const routes: Routes = [
       {
         path: 'visitas',
         loadChildren: () => import('../visitas/visitas.module').then(m => m.VisitasModule)
+      },
+      {
+        path: 'configuraciones',
+        loadChildren: () => import('../configuraciones/configuraciones.module').then(m => m.ConfiguracionesModule)
       }
     ]
   }
