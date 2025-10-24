@@ -1,1 +1,214 @@
-<p>register works!</p>
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div class="row w-100">
+    <div class="col-md-6 col-lg-4 mx-auto">
+      <!-- Card de Registro -->
+      <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-header bg-primary text-white text-center py-4">
+          <h3 class="mb-0">
+            <i class="fas fa-user-plus me-2"></i>
+            Crear Cuenta
+          </h3>
+          <p class="mb-0 mt-2 opacity-75">Registro de nuevo usuario</p>
+        </div>
+        
+        <div class="card-body p-4">
+          <form [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate>
+            
+            <!-- Nombre y Apellido -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="nombre" class="form-label">
+                  <i class="fas fa-user me-1"></i>
+                  Nombre *
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  [class.is-invalid]="registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched"
+                  id="nombre" 
+                  formControlName="nombre"
+                  placeholder="Ingresa tu nombre">
+                <div class="invalid-feedback" *ngIf="registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched">
+                  <small *ngIf="registerForm.get('nombre')?.errors?.['required']">
+                    El nombre es requerido
+                  </small>
+                  <small *ngIf="registerForm.get('nombre')?.errors?.['minlength']">
+                    Mínimo 2 caracteres
+                  </small>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <label for="apellido" class="form-label">
+                  <i class="fas fa-user me-1"></i>
+                  Apellido *
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control"
+                  [class.is-invalid]="registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched"
+                  id="apellido" 
+                  formControlName="apellido"
+                  placeholder="Ingresa tu apellido">
+                <div class="invalid-feedback" *ngIf="registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched">
+                  <small *ngIf="registerForm.get('apellido')?.errors?.['required']">
+                    El apellido es requerido
+                  </small>
+                  <small *ngIf="registerForm.get('apellido')?.errors?.['minlength']">
+                    Mínimo 2 caracteres
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label">
+                <i class="fas fa-envelope me-1"></i>
+                Correo Electrónico *
+              </label>
+              <input 
+                type="email" 
+                class="form-control"
+                [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+                id="email" 
+                formControlName="email"
+                placeholder="correo@ejemplo.com">
+              <div class="invalid-feedback" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+                <small *ngIf="registerForm.get('email')?.errors?.['required']">
+                  El correo es requerido
+                </small>
+                <small *ngIf="registerForm.get('email')?.errors?.['email']">
+                  Formato de correo inválido
+                </small>
+              </div>
+            </div>
+
+            <!-- Teléfono y Rol -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="telefono" class="form-label">
+                  <i class="fas fa-phone me-1"></i>
+                  Teléfono
+                </label>
+                <input 
+                  type="tel" 
+                  class="form-control"
+                  [class.is-invalid]="registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched"
+                  id="telefono" 
+                  formControlName="telefono"
+                  placeholder="12345678">
+                <div class="invalid-feedback" *ngIf="registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched">
+                  <small *ngIf="registerForm.get('telefono')?.errors?.['pattern']">
+                    Formato de teléfono inválido (8-15 dígitos)
+                  </small>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <label for="rol" class="form-label">
+                  <i class="fas fa-user-tag me-1"></i>
+                  Rol *
+                </label>
+                <select 
+                  class="form-select"
+                  [class.is-invalid]="registerForm.get('rol')?.invalid && registerForm.get('rol')?.touched"
+                  id="rol" 
+                  formControlName="rol">
+                  <option *ngFor="let rol of roles" [value]="rol.value">
+                    {{ rol.label }}
+                  </option>
+                </select>
+                <div class="invalid-feedback" *ngIf="registerForm.get('rol')?.invalid && registerForm.get('rol')?.touched">
+                  <small *ngIf="registerForm.get('rol')?.errors?.['required']">
+                    El rol es requerido
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="mb-3">
+              <label for="password" class="form-label">
+                <i class="fas fa-lock me-1"></i>
+                Contraseña *
+              </label>
+              <div class="input-group">
+                <input 
+                  [type]="showPassword() ? 'text' : 'password'" 
+                  class="form-control"
+                  [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+                  id="password" 
+                  formControlName="password"
+                  placeholder="Mínimo 6 caracteres">
+                <button 
+                  class="btn btn-outline-secondary" 
+                  type="button" 
+                  (click)="togglePasswordVisibility()">
+                  <i [class]="showPassword() ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
+              </div>
+              <div class="invalid-feedback" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                <small *ngIf="registerForm.get('password')?.errors?.['required']">
+                  La contraseña es requerida
+                </small>
+                <small *ngIf="registerForm.get('password')?.errors?.['minlength']">
+                  Mínimo 6 caracteres
+                </small>
+              </div>
+            </div>
+
+            <!-- Confirmar Contraseña -->
+            <div class="mb-4">
+              <label for="confirmPassword" class="form-label">
+                <i class="fas fa-lock me-1"></i>
+                Confirmar Contraseña *
+              </label>
+              <input 
+                type="password" 
+                class="form-control"
+                [class.is-invalid]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
+                id="confirmPassword" 
+                formControlName="confirmPassword"
+                placeholder="Confirma tu contraseña">
+              <div class="invalid-feedback" *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
+                <small *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">
+                  Debes confirmar la contraseña
+                </small>
+                <small *ngIf="registerForm.get('confirmPassword')?.errors?.['passwordMismatch']">
+                  Las contraseñas no coinciden
+                </small>
+              </div>
+            </div>
+
+            <!-- Botón de Registro -->
+            <div class="d-grid mb-3">
+              <button 
+                type="submit" 
+                class="btn btn-primary btn-lg"
+                [disabled]="registerForm.invalid || isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <i *ngIf="!isLoading" class="fas fa-user-plus me-2"></i>
+                {{ isLoading ? 'Creando cuenta...' : 'Crear Cuenta' }}
+              </button>
+            </div>
+
+            <!-- Link a Login -->
+            <div class="text-center">
+              <p class="mb-0">
+                ¿Ya tienes cuenta? 
+                <button 
+                  type="button" 
+                  class="btn btn-link p-0 ms-1" 
+                  (click)="navigateToLogin()">
+                  Iniciar Sesión
+                </button>
+              </p>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

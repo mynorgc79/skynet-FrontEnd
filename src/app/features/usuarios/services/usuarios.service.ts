@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { BaseApiService } from '@core/services/base-api.service';
-import { MockDataService } from '@core/services/mock-data.service';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, catchError, throwError } from 'rxjs';
+import { AuthService } from '@core/services/auth.service';
 import { Usuario, UsuarioCreateDTO, UsuarioUpdateDTO, UsuarioFilter, RoleTipo } from '@core/interfaces';
 
 @Injectable({
@@ -9,55 +9,162 @@ import { Usuario, UsuarioCreateDTO, UsuarioUpdateDTO, UsuarioFilter, RoleTipo } 
 })
 export class UsuariosService {
 
-  private readonly endpoint = 'usuarios';
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private baseUrl = 'http://localhost:8000/api'; // URL del backend
 
-  constructor(
-    private baseApiService: BaseApiService,
-    private mockDataService: MockDataService
-  ) { }
-
-  // Métodos que usarán la API cuando esté disponible
+  // Métodos que usan la API real
   getAll(filters?: UsuarioFilter): Observable<Usuario[]> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.get<Usuario[]>(`${this.endpoint}`, filters);
-    return this.mockDataService.getUsuarios(filters);
+    // Usar AuthService que ya tiene implementado getUsuarios() con el endpoint correcto
+    return this.authService.getUsuarios().pipe(
+      map(usuarios => {
+        // Aplicar filtros localmente si se proporcionan
+        if (!filters) return usuarios;
+        
+        return usuarios.filter(usuario => {
+          if (filters.nombre && !usuario.nombre.toLowerCase().includes(filters.nombre.toLowerCase()) && 
+              !usuario.apellido.toLowerCase().includes(filters.nombre.toLowerCase())) {
+            return false;
+          }
+          if (filters.email && !usuario.email.toLowerCase().includes(filters.email.toLowerCase())) {
+            return false;
+          }
+          if (filters.rol && usuario.rol !== filters.rol) {
+            return false;
+          }
+          if (filters.activo !== undefined && usuario.activo !== filters.activo) {
+            return false;
+          }
+          return true;
+        });
+      }),
+      catchError(error => {
+        console.error('Error fetching users:', error);
+        return throwError(() => 'Error al obtener usuarios');
+      })
+    );
   }
 
   getById(id: number): Observable<Usuario> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.get<Usuario>(`${this.endpoint}/${id}`);
-    return this.mockDataService.getUsuarioById(id);
+    return this.http.get<any>(`${this.baseUrl}/usuarios/usuarios/${id}/`).pipe(
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error('Usuario no encontrado');
+        }
+        
+        // Mapear del formato backend al formato frontend
+        const backendUser = response.data;
+        return {
+          idUsuario: backendUser.id,
+          nombre: backendUser.nombre,
+          apellido: backendUser.apellido,
+          email: backendUser.email,
+          telefono: backendUser.telefono,
+          rol: backendUser.rol as RoleTipo,
+          idSupervisor: backendUser.idSupervisor,
+          activo: backendUser.activo,
+          fechaCreacion: new Date(backendUser.fecha_creacion),
+          fechaActualizacion: new Date(backendUser.fecha_actualizacion),
+        } as Usuario;
+      }),
+      catchError(error => {
+        console.error('Error fetching user by id:', error);
+        return throwError(() => 'Error al obtener usuario');
+      })
+    );
   }
 
   create(usuario: UsuarioCreateDTO): Observable<Usuario> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.post<Usuario>(this.endpoint, usuario);
-    return this.mockDataService.createUsuario(usuario);
+    // Usar AuthService.register() que ya está implementado
+    const temporalPassword = 'temporal123'; // En un caso real, se podría generar una contraseña temporal
+    const registerData = {
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      email: usuario.email,
+      telefono: usuario.telefono,
+      rol: usuario.rol,
+      password: temporalPassword,
+      confirm_password: temporalPassword // Campo requerido por el backend
+    };
+    
+    return this.authService.register(registerData);
   }
 
   update(id: number, usuario: UsuarioUpdateDTO): Observable<Usuario> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<Usuario>(`${this.endpoint}/${id}`, usuario);
-    return this.mockDataService.updateUsuario(id, usuario);
+    return this.http.put<any>(`${this.baseUrl}/usuarios/usuarios/${id}/`, usuario).pipe(
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error('Error al actualizar usuario');
+        }
+        
+        const backendUser = response.data;
+        return {
+          idUsuario: backendUser.id,
+          nombre: backendUser.nombre,
+          apellido: backendUser.apellido,
+          email: backendUser.email,
+          telefono: backendUser.telefono,
+          rol: backendUser.rol as RoleTipo,
+          idSupervisor: backendUser.idSupervisor,
+          activo: backendUser.activo,
+          fechaCreacion: new Date(backendUser.fecha_creacion),
+          fechaActualizacion: new Date(backendUser.fecha_actualizacion),
+        } as Usuario;
+      }),
+      catchError(error => {
+        console.error('Error updating user:', error);
+        return throwError(() => 'Error al actualizar usuario');
+      })
+    );
   }
 
-  delete(id: number): Observable<void> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.delete<void>(`${this.endpoint}/${id}`);
-    return this.mockDataService.deleteUsuario(id);
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<any>(`${this.baseUrl}/usuarios/usuarios/${id}/`).pipe(
+      map(() => void 0),
+      catchError(error => {
+        console.error('Error deleting user:', error);
+        return throwError(() => 'Error al eliminar usuario');
+      })
+    );
   }
 
   // Métodos específicos del dominio
   changePassword(id: number, newPassword: string): Observable<void> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<void>(`${this.endpoint}/${id}/change-password`, { password: newPassword });
-    return this.mockDataService.changeUserPassword(id, newPassword);
+    return this.http.put<any>(`${this.baseUrl}/usuarios/usuarios/${id}/change-password/`, { password: newPassword }).pipe(
+      map(() => void 0),
+      catchError(error => {
+        console.error('Error changing password:', error);
+        return throwError(() => 'Error al cambiar contraseña');
+      })
+    );
   }
 
   toggleStatus(id: number): Observable<Usuario> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<Usuario>(`${this.endpoint}/${id}/toggle-status`, {});
-    return this.mockDataService.toggleUserStatus(id);
+    return this.http.put<any>(`${this.baseUrl}/usuarios/usuarios/${id}/toggle-status/`, {}).pipe(
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error('Error al cambiar estado del usuario');
+        }
+        
+        const backendUser = response.data;
+        return {
+          idUsuario: backendUser.id,
+          nombre: backendUser.nombre,
+          apellido: backendUser.apellido,
+          email: backendUser.email,
+          telefono: backendUser.telefono,
+          rol: backendUser.rol as RoleTipo,
+          idSupervisor: backendUser.idSupervisor,
+          activo: backendUser.activo,
+          fechaCreacion: new Date(backendUser.fecha_creacion),
+          fechaActualizacion: new Date(backendUser.fecha_actualizacion),
+        } as Usuario;
+      }),
+      catchError(error => {
+        console.error('Error toggling user status:', error);
+        return throwError(() => 'Error al cambiar estado del usuario');
+      })
+    );
   }
 
   getByRole(rol: RoleTipo): Observable<Usuario[]> {
@@ -65,8 +172,8 @@ export class UsuariosService {
   }
 
   getTecnicosBySupervisor(supervisorId: number): Observable<Usuario[]> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.get<Usuario[]>(`${this.endpoint}/supervisor/${supervisorId}/tecnicos`);
-    return this.mockDataService.getTecnicosBySupervisor(supervisorId);
+    return this.getAll().pipe(
+      map(usuarios => usuarios.filter(u => u.idSupervisor === supervisorId && u.rol === RoleTipo.TECNICO))
+    );
   }
 }
