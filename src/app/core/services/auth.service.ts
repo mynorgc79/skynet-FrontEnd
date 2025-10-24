@@ -9,6 +9,34 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  confirm_password: string; // Campo requerido por el backend
+  nombre: string;
+  apellido: string;
+  telefono?: string;
+  rol: string; // 'ADMINISTRADOR', 'SUPERVISOR', 'TECNICO'
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  data: {
+    id: number;
+    email: string;
+    nombre: string;
+    apellido: string;
+    nombre_completo: string;
+    telefono?: string;
+    rol: string;
+    activo: boolean;
+    fecha_creacion: string;
+    fecha_actualizacion: string;
+  };
+  message: string;
+  errors: string[];
+}
+
 export interface AuthResponse {
   token: string;
   user: Usuario;
@@ -27,6 +55,8 @@ export class AuthService {
   private baseUrl = environment.apiUrl;
   private loginUrl = `${this.baseUrl}${environment.authEndpoints.login}`;
   private refreshUrl = `${this.baseUrl}${environment.authEndpoints.refresh}`;
+  private registerUrl = `${this.baseUrl}${environment.userEndpoints.create}`;
+  private usuariosUrl = `${this.baseUrl}${environment.userEndpoints.list}`;
 
   constructor() {
     // Cargar usuario desde localStorage si existe
@@ -187,6 +217,74 @@ export class AuthService {
       }),
       catchError(err => {
         const message = err?.error?.message || err?.message || 'Error al renovar token';
+        return throwError(() => message);
+      })
+    );
+  }
+
+  /**
+   * Registrar nuevo usuario
+   */
+  public register(userData: RegisterRequest): Observable<Usuario> {
+    return this.http.post<RegisterResponse>(this.registerUrl, userData).pipe(
+      map(resp => {
+        if (!resp || !resp.success || !resp.data) {
+          throw new Error(resp?.message || 'Error al registrar usuario');
+        }
+
+        const backendUser = resp.data;
+
+        // Mapear usuario backend a la interfaz Usuario del frontend
+        const user: Usuario = {
+          idUsuario: backendUser.id,
+          nombre: backendUser.nombre,
+          apellido: backendUser.apellido,
+          email: backendUser.email,
+          telefono: backendUser.telefono,
+          rol: backendUser.rol as any, // Asumir que el rol es válido
+          idSupervisor: undefined, // No viene en la respuesta
+          activo: backendUser.activo,
+          fechaCreacion: new Date(backendUser.fecha_creacion),
+          fechaActualizacion: new Date(backendUser.fecha_actualizacion),
+        };
+
+        return user;
+      }),
+      catchError(err => {
+        const message = err?.error?.message || err?.message || 'Error al registrar usuario';
+        return throwError(() => message);
+      })
+    );
+  }
+
+  /**
+   * Obtener lista de usuarios
+   */
+  public getUsuarios(): Observable<Usuario[]> {
+    return this.http.get<any>(this.usuariosUrl).pipe(
+      map(resp => {
+        if (!resp || !resp.success || !resp.data) {
+          throw new Error(resp?.message || 'Error al obtener usuarios');
+        }
+
+        // Mapear array de usuarios backend a interface Usuario
+        const usuarios: Usuario[] = resp.data.map((backendUser: any) => ({
+          idUsuario: backendUser.id,
+          nombre: backendUser.nombre,
+          apellido: backendUser.apellido,
+          email: backendUser.email,
+          telefono: backendUser.telefono,
+          rol: backendUser.rol as any,
+          idSupervisor: backendUser.idSupervisor,
+          activo: backendUser.activo ?? true,
+          fechaCreacion: new Date(backendUser.fecha_creacion || new Date()),
+          fechaActualizacion: new Date(backendUser.fecha_actualizacion || new Date()),
+        }));
+
+        return usuarios;
+      }),
+      catchError(err => {
+        const message = err?.error?.message || err?.message || 'Error al obtener usuarios';
         return throwError(() => message);
       })
     );
