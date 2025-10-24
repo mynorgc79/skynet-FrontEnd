@@ -41,9 +41,10 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private isAuthRequest(request: HttpRequest<any>): boolean {
-    return request.url.includes('/auth/login') || 
+    return request.url.includes('/usuarios/login') || 
            request.url.includes('/auth/refresh') ||
-           request.url.includes('/auth/register');
+           request.url.includes('/auth/register') ||
+           request.url.includes('/usuarios/usuarios/create');
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
