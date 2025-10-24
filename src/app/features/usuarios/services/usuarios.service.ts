@@ -46,8 +46,12 @@ export class UsuariosService {
   }
 
   getById(id: number): Observable<Usuario> {
-    return this.http.get<any>(`${this.baseUrl}/usuarios/usuarios/${id}/`).pipe(
+    const url = `${this.baseUrl}/usuarios/usuarios/${id}/`;
+    console.log('Haciendo petición GET a:', url);
+    
+    return this.http.get<any>(url).pipe(
       map(response => {
+        console.log('Respuesta del servidor:', response);
         if (!response.success || !response.data) {
           throw new Error('Usuario no encontrado');
         }
@@ -61,7 +65,6 @@ export class UsuariosService {
           email: backendUser.email,
           telefono: backendUser.telefono,
           rol: backendUser.rol as RoleTipo,
-          idSupervisor: backendUser.idSupervisor,
           activo: backendUser.activo,
           fechaCreacion: new Date(backendUser.fecha_creacion),
           fechaActualizacion: new Date(backendUser.fecha_actualizacion),
@@ -75,28 +78,25 @@ export class UsuariosService {
   }
 
   create(usuario: UsuarioCreateDTO): Observable<Usuario> {
-    // Usar AuthService.register() que ya está implementado
+    // Usar el endpoint específico para crear usuarios
     const temporalPassword = 'temporal123'; // En un caso real, se podría generar una contraseña temporal
-    const registerData = {
+    const userData = {
       nombre: usuario.nombre,
       apellido: usuario.apellido,
       email: usuario.email,
-      telefono: usuario.telefono,
+      telefono: usuario.telefono || '',
       rol: usuario.rol,
       password: temporalPassword,
       confirm_password: temporalPassword // Campo requerido por el backend
     };
     
-    return this.authService.register(registerData);
-  }
-
-  update(id: number, usuario: UsuarioUpdateDTO): Observable<Usuario> {
-    return this.http.put<any>(`${this.baseUrl}/usuarios/usuarios/${id}/`, usuario).pipe(
+    return this.http.post<any>(`${this.baseUrl}/usuarios/usuarios/create/`, userData).pipe(
       map(response => {
         if (!response.success || !response.data) {
-          throw new Error('Error al actualizar usuario');
+          throw new Error('Error al crear usuario');
         }
         
+        // Mapear del formato backend al formato frontend
         const backendUser = response.data;
         return {
           idUsuario: backendUser.id,
@@ -105,7 +105,47 @@ export class UsuariosService {
           email: backendUser.email,
           telefono: backendUser.telefono,
           rol: backendUser.rol as RoleTipo,
-          idSupervisor: backendUser.idSupervisor,
+          activo: backendUser.activo,
+          fechaCreacion: new Date(backendUser.fecha_creacion),
+          fechaActualizacion: new Date(backendUser.fecha_actualizacion),
+        } as Usuario;
+      }),
+      catchError(error => {
+        console.error('Error creating user:', error);
+        return throwError(() => 'Error al crear usuario');
+      })
+    );
+  }
+
+  update(id: number, usuario: UsuarioUpdateDTO): Observable<Usuario> {
+    // Usar el endpoint específico para actualizar usuarios
+    const userData = {
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      email: usuario.email,
+      telefono: usuario.telefono || '',
+      rol: usuario.rol
+    };
+    
+    const url = `${this.baseUrl}/usuarios/usuarios/${id}/update/`;
+    console.log('Haciendo petición PUT a:', url, 'con datos:', userData);
+    
+    return this.http.put<any>(url, userData).pipe(
+      map(response => {
+        console.log('Respuesta del servidor (update):', response);
+        if (!response.success || !response.data) {
+          throw new Error('Error al actualizar usuario');
+        }
+        
+        // Mapear del formato backend al formato frontend
+        const backendUser = response.data;
+        return {
+          idUsuario: backendUser.id,
+          nombre: backendUser.nombre,
+          apellido: backendUser.apellido,
+          email: backendUser.email,
+          telefono: backendUser.telefono,
+          rol: backendUser.rol as RoleTipo,
           activo: backendUser.activo,
           fechaCreacion: new Date(backendUser.fecha_creacion),
           fechaActualizacion: new Date(backendUser.fecha_actualizacion),
@@ -140,12 +180,18 @@ export class UsuariosService {
   }
 
   toggleStatus(id: number): Observable<Usuario> {
-    return this.http.put<any>(`${this.baseUrl}/usuarios/usuarios/${id}/toggle-status/`, {}).pipe(
+    // Usar POST para activar/desactivar usuario
+    const url = `${this.baseUrl}/usuarios/usuarios/${id}/toggle-status/`;
+    console.log('Haciendo petición POST a:', url);
+    
+    return this.http.post<any>(url, {}).pipe(
       map(response => {
+        console.log('Respuesta del servidor (toggle):', response);
         if (!response.success || !response.data) {
           throw new Error('Error al cambiar estado del usuario');
         }
         
+        // Mapear del formato backend al formato frontend
         const backendUser = response.data;
         return {
           idUsuario: backendUser.id,
@@ -154,7 +200,6 @@ export class UsuariosService {
           email: backendUser.email,
           telefono: backendUser.telefono,
           rol: backendUser.rol as RoleTipo,
-          idSupervisor: backendUser.idSupervisor,
           activo: backendUser.activo,
           fechaCreacion: new Date(backendUser.fecha_creacion),
           fechaActualizacion: new Date(backendUser.fecha_actualizacion),

@@ -30,21 +30,29 @@ export class AuthInterceptor implements HttpInterceptor {
   private addTokenHeader(request: HttpRequest<any>): HttpRequest<any> {
     const token = this.authService.getToken();
     
+    console.log('Interceptor - URL:', request.url);
+    console.log('Interceptor - Token disponible:', !!token);
+    console.log('Interceptor - Es auth request:', this.isAuthRequest(request));
+    
     // No agregar token a requests de autenticación
     if (!token || this.isAuthRequest(request)) {
+      console.log('Interceptor - No se agregó token');
       return request;
     }
     
+    console.log('Interceptor - Token agregado a la request');
     return request.clone({
       headers: request.headers.set('Authorization', `Bearer ${token}`)
     });
   }
 
   private isAuthRequest(request: HttpRequest<any>): boolean {
-    return request.url.includes('/usuarios/login') || 
+    const isAuth = request.url.includes('/usuarios/login') || 
            request.url.includes('/auth/refresh') ||
-           request.url.includes('/auth/register') ||
-           request.url.includes('/usuarios/usuarios/create');
+           request.url.includes('/auth/register');
+    
+    console.log('Interceptor - isAuthRequest para', request.url, ':', isAuth);
+    return isAuth;
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

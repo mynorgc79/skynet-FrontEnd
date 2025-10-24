@@ -8,6 +8,7 @@ import { UsuariosRoutingModule } from './usuarios-routing.module';
 
 // Components
 import { UsuariosListComponent } from './pages/usuarios-list.component';
+import { UsuarioDetailComponent } from './components/usuario-detail.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { UsuariosListComponent } from './pages/usuarios-list.component';
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    UsuariosRoutingModule
+    UsuariosRoutingModule,
+    UsuarioDetailComponent // Standalone component
   ]
 })
 export class UsuariosModule { }

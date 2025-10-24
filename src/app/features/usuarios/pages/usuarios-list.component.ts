@@ -184,6 +184,15 @@ import { Usuario, UsuarioFilter, RoleTipo } from '@core/interfaces';
         <p class="text-muted">Intenta ajustar los filtros o crear un nuevo usuario</p>
       </div>
     </div>
+
+    <!-- Modal de Usuario -->
+    <app-usuario-detail
+      [show]="showModal"
+      [usuarioId]="selectedUsuarioId"
+      [mode]="modalMode"
+      (closed)="onModalClosed()"
+      (userUpdated)="onUserUpdated($event)">
+    </app-usuario-detail>
   `,
   styles: [`
     .avatar-circle {
@@ -225,6 +234,11 @@ export class UsuariosListComponent implements OnInit {
   
   filters: UsuarioFilter = {};
   filterStatus: string = '';
+
+  // Modal properties
+  showModal = false;
+  selectedUsuarioId: number | null = null;
+  modalMode: 'view' | 'edit' | 'toggle' = 'view';
 
   ngOnInit(): void {
     this.cargarUsuarios();
@@ -280,30 +294,39 @@ export class UsuariosListComponent implements OnInit {
   }
 
   verUsuario(id: number): void {
-    this.router.navigate(['/dashboard/usuarios', id]);
+    console.log('Abriendo modal para ver usuario con ID:', id);
+    this.selectedUsuarioId = id;
+    this.modalMode = 'view';
+    this.showModal = true;
   }
 
   editarUsuario(id: number): void {
-    this.router.navigate(['/dashboard/usuarios', id, 'editar']);
+    console.log('Abriendo modal para editar usuario con ID:', id);
+    this.selectedUsuarioId = id;
+    this.modalMode = 'edit';
+    this.showModal = true;
   }
 
   toggleUsuarioStatus(usuario: Usuario): void {
-    const action = usuario.activo ? 'desactivar' : 'activar';
-    
-    this.usuariosService.toggleStatus(usuario.idUsuario).subscribe({
-      next: (updatedUsuario) => {
-        const index = this.usuarios.findIndex(u => u.idUsuario === usuario.idUsuario);
-        if (index !== -1) {
-          this.usuarios[index] = updatedUsuario;
-          this.applyFilters(); // Refresh filtered list
-        }
-        this.toastService.showSuccess(`Usuario ${action}do correctamente`);
-      },
-      error: (error) => {
-        this.toastService.showError(`Error al ${action} usuario`);
-        console.error(`Error toggling user status:`, error);
-      }
-    });
+    // Abrir modal en modo toggle para confirmar la acción
+    console.log('Abriendo modal para toggle usuario:', usuario.idUsuario, 'Estado actual:', usuario.activo);
+    this.selectedUsuarioId = usuario.idUsuario;
+    this.modalMode = 'toggle';
+    this.showModal = true;
+  }
+
+  onModalClosed(): void {
+    this.showModal = false;
+    this.selectedUsuarioId = null;
+    this.modalMode = 'view';
+  }
+
+  onUserUpdated(updatedUser: Usuario): void {
+    const index = this.usuarios.findIndex(u => u.idUsuario === updatedUser.idUsuario);
+    if (index !== -1) {
+      this.usuarios[index] = updatedUser;
+      this.applyFilters(); // Refresh filtered list
+    }
   }
 
   // Utility methods
