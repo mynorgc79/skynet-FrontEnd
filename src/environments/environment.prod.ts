@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.skynet.com/api', // Cambiar por URL de producción
+  apiUrl: 'http://localhost:8000/api', // Cambiar por URL de producción cuando esté lista
   authEndpoints: {
     login: '/usuarios/login/',
     refresh: '/auth/refresh/',
@@ -10,8 +10,8 @@ export const environment = {
   userEndpoints: {
     create: '/usuarios/usuarios/create/',
     list: '/usuarios/usuarios/',
-    detail: '/usuarios/usuarios/', // + id/
-    update: '/usuarios/usuarios/', // + id/
-    delete: '/usuarios/usuarios/'  // + id/
+    detail: '/usuarios/usuarios/id/', // + id/
+    update: '/usuarios/usuarios/id/update/', // + id/update/
+    toggleStatus: '/usuarios/usuarios/id/toggle-status/'
   }
 };
