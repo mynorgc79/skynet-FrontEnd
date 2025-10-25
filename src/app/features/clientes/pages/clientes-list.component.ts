@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ClientesService } from '../services/clientes.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Cliente, ClienteFilter } from '@core/interfaces';
 
 @Component({
@@ -226,6 +227,7 @@ import { Cliente, ClienteFilter } from '@core/interfaces';
                       </button>
                       <button 
                         class="btn btn-outline-info"
+                        *ngIf="canPlanificarVisita()"
                         (click)="planificarVisita(cliente.idCliente)"
                         title="Planificar visita">
                         <i class="fas fa-calendar-plus"></i>
@@ -309,6 +311,7 @@ export class ClientesListComponent implements OnInit {
   private clientesService = inject(ClientesService);
   private toastService = inject(ToastService);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   clientes: Cliente[] = [];
   clientesFiltrados: Cliente[] = [];
@@ -473,5 +476,11 @@ export class ClientesListComponent implements OnInit {
       month: '2-digit',
       year: 'numeric'
     });
+  }
+
+  // Role-based methods
+  canPlanificarVisita(): boolean {
+    // Solo ADMINISTRADOR y SUPERVISOR pueden planificar visitas
+    return this.authService.hasAnyRole(['ADMINISTRADOR', 'SUPERVISOR']);
   }
 }
