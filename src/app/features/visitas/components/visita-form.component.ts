@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { VisitasService } from '../services/visitas.service';
 import { ClientesService } from '../../clientes/services/clientes.service';
@@ -14,7 +14,7 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
 @Component({
   selector: 'app-visita-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   template: `
     <div class="container-fluid">
       <!-- Header -->
@@ -53,16 +53,15 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
                     <label class="form-label">Cliente *</label>
                     <select 
                       class="form-select"
-                      formControlName="idCliente"
-                      [class.is-invalid]="isFieldInvalid('idCliente')">
+                      formControlName="clienteId"
+                      [class.is-invalid]="isFieldInvalid('clienteId')"
+                      [class.is-valid]="isFieldValid('clienteId')"
+                      (blur)="markFieldAsTouched('clienteId')">
                       <option value="">Seleccionar cliente</option>
                       <option *ngFor="let cliente of clientes" [value]="cliente.idCliente">
                         {{ cliente.nombre }} - {{ cliente.contacto }} ({{ cliente.tipoCliente }})
                       </option>
                     </select>
-                    <div class="invalid-feedback">
-                      Debe seleccionar un cliente
-                    </div>
                   </div>
                   <div class="col-md-6" *ngIf="selectedCliente">
                     <label class="form-label">Datos de Contacto</label>
@@ -87,32 +86,32 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
               <div class="card-body">
                 <div class="row g-3">
                   <div class="col-md-6">
-                    <label class="form-label">Motivo de la visita *</label>
-                    <input 
-                      type="text" 
-                      class="form-control"
-                      formControlName="motivo"
-                      placeholder="Ej: Mantenimiento preventivo"
-                      [class.is-invalid]="isFieldInvalid('motivo')">
-                    <div class="invalid-feedback">
-                      El motivo es obligatorio
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Prioridad *</label>
+                    <label class="form-label">Tipo de Visita *</label>
                     <select 
                       class="form-select"
-                      formControlName="prioridad"
-                      [class.is-invalid]="isFieldInvalid('prioridad')">
-                      <option value="">Seleccionar prioridad</option>
-                      <option value="URGENTE">🔴 Urgente</option>
-                      <option value="ALTA">🟠 Alta</option>
-                      <option value="MEDIA">🟡 Media</option>
-                      <option value="BAJA">🟢 Baja</option>
+                      formControlName="tipoVisita"
+                      [class.is-invalid]="isFieldInvalid('tipoVisita')"
+                      [class.is-valid]="isFieldValid('tipoVisita')"
+                      (blur)="markFieldAsTouched('tipoVisita')">
+                      <option value="">Seleccionar tipo</option>
+                      <option value="MANTENIMIENTO">🔧 Mantenimiento</option>
+                      <option value="INSTALACION">🏗️ Instalación</option>
+                      <option value="SOPORTE">🛠️ Soporte</option>
+                      <option value="INSPECCION">🔍 Inspección</option>
+                      <option value="REPARACION">⚡ Reparación</option>
                     </select>
-                    <div class="invalid-feedback">
-                      Debe seleccionar una prioridad
-                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Estado</label>
+                    <select 
+                      class="form-select"
+                      formControlName="estado"
+                      [disabled]="!isEditing">
+                      <option value="PROGRAMADA">Programada</option>
+                      <option value="EN_PROGRESO">En Progreso</option>
+                      <option value="COMPLETADA">Completada</option>
+                      <option value="CANCELADA">Cancelada</option>
+                    </select>
                   </div>
                 </div>
                 
@@ -125,9 +124,6 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
                       formControlName="fechaVisita"
                       [min]="today"
                       [class.is-invalid]="isFieldInvalid('fechaVisita')">
-                    <div class="invalid-feedback">
-                      La fecha es obligatoria
-                    </div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Hora estimada</label>
@@ -138,38 +134,67 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
                   </div>
                 </div>
 
-                <div class="row g-3 mt-2">
+                <div class="row g-3">
                   <div class="col-md-6">
-                    <label class="form-label">Duración estimada (minutos)</label>
-                    <select class="form-select" formControlName="duracionEstimada">
-                      <option value="30">30 minutos</option>
-                      <option value="60" selected>1 hora</option>
-                      <option value="90">1.5 horas</option>
-                      <option value="120">2 horas</option>
-                      <option value="180">3 horas</option>
-                      <option value="240">4 horas</option>
-                    </select>
+                    <label class="form-label">Fecha programada *</label>
+                    <input 
+                      type="date" 
+                      class="form-control"
+                      formControlName="fechaProgramada"
+                      [min]="today"
+                      [class.is-invalid]="isFieldInvalid('fechaProgramada')"
+                      [class.is-valid]="isFieldValid('fechaProgramada')"
+                      (blur)="markFieldAsTouched('fechaProgramada')">
                   </div>
                   <div class="col-md-6" *ngIf="currentUser?.rol !== 'TECNICO'">
-                    <label class="form-label">Técnico asignado</label>
+                    <label class="form-label">Técnico asignado *</label>
                     <select 
                       class="form-select"
-                      formControlName="idTecnico">
-                      <option value="">Sin asignar</option>
-                      <option *ngFor="let tecnico of tecnicos" [value]="tecnico.idUsuario">
+                      formControlName="tecnicoId"
+                      [class.is-invalid]="isFieldInvalid('tecnicoId')"
+                      [class.is-valid]="isFieldValid('tecnicoId')"
+                      (blur)="markFieldAsTouched('tecnicoId')">
+                      <option value="">Seleccionar técnico</option>
+                      <option *ngFor="let tecnico of tecnicos" [value]="getUsuarioId(tecnico)">
                         {{ tecnico.nombre }} {{ tecnico.apellido }}
+                      </option>
+                    </select>
+                    <div class="invalid-feedback" *ngIf="isFieldInvalid('tecnicoId')">
+                      Debe seleccionar un técnico para la visita
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row g-3 mt-2" *ngIf="currentUser?.rol === 'ADMINISTRADOR'">
+                  <div class="col-md-6">
+                    <label class="form-label">Supervisor asignado</label>
+                    <select 
+                      class="form-select"
+                      formControlName="supervisorId">
+                      <option value="">Sin asignar</option>
+                      <option *ngFor="let supervisor of supervisores" [value]="getUsuarioId(supervisor)">
+                        {{ supervisor.nombre }} {{ supervisor.apellido }}
                       </option>
                     </select>
                   </div>
                 </div>
 
                 <div class="mt-3">
-                  <label class="form-label">Descripción adicional</label>
+                  <label class="form-label">Descripción</label>
                   <textarea 
                     class="form-control" 
                     rows="4"
                     formControlName="descripcion"
-                    placeholder="Detalles adicionales sobre la visita, equipos a revisar, etc."></textarea>
+                    placeholder="Detalles sobre la visita, equipos a revisar, etc."></textarea>
+                </div>
+                
+                <div class="mt-3">
+                  <label class="form-label">Observaciones</label>
+                  <textarea 
+                    class="form-control" 
+                    rows="3"
+                    formControlName="observaciones"
+                    placeholder="Observaciones adicionales"></textarea>
                 </div>
               </div>
             </div>
@@ -214,6 +239,13 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
                     <div class="alert alert-info">
                       <i class="fas fa-info-circle me-2"></i>
                       Si no proporciona coordenadas GPS, se utilizará la dirección del cliente registrada.
+                    </div>
+                    <div class="alert alert-warning" *ngIf="tecnicos.length === 0">
+                      <i class="fas fa-exclamation-triangle me-2"></i>
+                      No hay técnicos disponibles. 
+                      <button class="btn btn-sm btn-outline-warning ms-2" type="button" (click)="debugTecnicos()">
+                        Recargar Usuarios
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -286,11 +318,26 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
     }
     
     .is-invalid {
-      border-color: #dc3545;
+      border-color: #dc3545 !important;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+    
+    .is-valid {
+      border-color: #198754 !important;
+      box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25) !important;
     }
     
     .invalid-feedback {
       display: block;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    
+    .valid-feedback {
+      display: block;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      color: #198754;
     }
     
     .alert-info {
@@ -301,6 +348,16 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
     
     .card-header h5, .card-header h6 {
       color: #495057;
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
     }
   `]
 })
@@ -322,6 +379,7 @@ export class VisitaFormComponent implements OnInit {
   
   clientes: Cliente[] = [];
   tecnicos: Usuario[] = [];
+  supervisores: Usuario[] = [];
   selectedCliente: Cliente | null = null;
   currentUser: Usuario | null = null;
   
@@ -336,24 +394,26 @@ export class VisitaFormComponent implements OnInit {
 
   initForm(): void {
     this.visitaForm = this.fb.group({
-      idCliente: ['', Validators.required],
-      motivo: ['', Validators.required],
+      clienteId: ['', Validators.required],
+      tipoVisita: ['', Validators.required],
       descripcion: [''],
+      observaciones: [''],
+      fechaProgramada: ['', Validators.required],
       fechaVisita: ['', Validators.required],
-      horaEstimada: ['09:00'],
-      duracionEstimada: [60],
-      prioridad: ['MEDIA', Validators.required],
-      idTecnico: [''],
+      horaEstimada: [''],
       direccion: [''],
+      estado: ['PROGRAMADA'],
+      tecnicoId: ['', Validators.required], // Hacer requerido siempre
+      supervisorId: [''],
       latitud: [''],
       longitud: ['']
     });
 
     // Escuchar cambios en el cliente seleccionado
-    this.visitaForm.get('idCliente')?.valueChanges.subscribe(idCliente => {
-      this.selectedCliente = this.clientes.find(c => c.idCliente === +idCliente) || null;
+    this.visitaForm.get('clienteId')?.valueChanges.subscribe(clienteId => {
+      this.selectedCliente = this.clientes.find(c => c.idCliente === +clienteId) || null;
       if (this.selectedCliente) {
-        // Prellenar dirección del cliente
+        // Prellenar coordenadas y dirección del cliente
         this.visitaForm.patchValue({
           direccion: this.selectedCliente.direccion || '',
           latitud: this.selectedCliente.latitud || '',
@@ -362,10 +422,35 @@ export class VisitaFormComponent implements OnInit {
       }
     });
 
+    // Sincronizar fechaVisita con fechaProgramada
+    this.visitaForm.get('fechaVisita')?.valueChanges.subscribe(fecha => {
+      if (fecha) {
+        this.visitaForm.patchValue({
+          fechaProgramada: fecha
+        }, { emitEvent: false });
+      }
+    });
+
+    // Sincronizar fechaProgramada con fechaVisita  
+    this.visitaForm.get('fechaProgramada')?.valueChanges.subscribe(fecha => {
+      if (fecha) {
+        this.visitaForm.patchValue({
+          fechaVisita: fecha
+        }, { emitEvent: false });
+      }
+    });
+
     // Si es técnico, auto-asignarse
     if (this.currentUser?.rol === 'TECNICO') {
       this.visitaForm.patchValue({
-        idTecnico: this.currentUser.idUsuario
+        tecnicoId: this.getUsuarioId(this.currentUser)
+      });
+    }
+    
+    // Si es supervisor, auto-asignarse como supervisor
+    if (this.currentUser?.rol === 'SUPERVISOR' || this.currentUser?.rol === 'ADMINISTRADOR') {
+      this.visitaForm.patchValue({
+        supervisorId: this.getUsuarioId(this.currentUser)
       });
     }
   }
@@ -378,16 +463,48 @@ export class VisitaFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading clients:', error);
+        this.toastService.showError('Error al cargar clientes');
       }
     });
 
-    // Cargar técnicos
-    this.usuarioService.getByRol('TECNICO').subscribe({
-      next: (tecnicos) => {
-        this.tecnicos = tecnicos;
+    // Cargar técnicos - primero intentamos con getTecnicos(), si falla usamos getUsuarios
+    this.usuarioService.getTecnicos().subscribe({
+      next: (response) => {
+        this.tecnicos = response.data || [];
+        if (this.tecnicos.length === 0) {
+          this.loadTecnicosFromAllUsers();
+        }
       },
       error: (error) => {
-        console.error('Error loading technicians:', error);
+        console.error('Error con getTecnicos(), intentando alternativa:', error);
+        this.loadTecnicosFromAllUsers();
+      }
+    });
+
+    // Cargar supervisores
+    this.usuarioService.getSupervisores().subscribe({
+      next: (response) => {
+        this.supervisores = response.data || [];
+      },
+      error: (error) => {
+        console.error('Error loading supervisors:', error);
+      }
+    });
+  }
+
+  loadTecnicosFromAllUsers(): void {
+    // Método alternativo para cargar técnicos desde todos los usuarios
+    this.usuarioService.getUsuarios(1, 100).subscribe({
+      next: (response) => {
+        const allUsers = response.data || [];
+        this.tecnicos = allUsers.filter(user => user.rol === 'TECNICO' && user.activo);
+        if (this.tecnicos.length === 0) {
+          this.toastService.showError('No hay técnicos disponibles');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading users for technicians:', error);
+        this.toastService.showError('Error al cargar técnicos');
       }
     });
   }
@@ -419,18 +536,20 @@ export class VisitaFormComponent implements OnInit {
   }
 
   populateForm(visita: Visita): void {
-    const fechaVisita = new Date(visita.fechaVisita).toISOString().split('T')[0];
+    const fechaProgramada = new Date(visita.fechaProgramada).toISOString().split('T')[0];
     
     this.visitaForm.patchValue({
-      idCliente: visita.idCliente,
-      motivo: visita.motivo,
+      clienteId: visita.clienteId,
+      tipoVisita: visita.tipoVisita,
       descripcion: visita.descripcion || '',
-      fechaVisita: fechaVisita,
-      horaEstimada: visita.horaEstimada || '09:00',
-      duracionEstimada: visita.duracionEstimada || 60,
-      prioridad: visita.prioridad,
-      idTecnico: visita.idTecnico || '',
-      direccion: visita.direccion || '',
+      observaciones: visita.observaciones || '',
+      fechaProgramada: fechaProgramada,
+      fechaVisita: fechaProgramada, // Usar la misma fecha por defecto
+      horaEstimada: '09:00', // Hora por defecto
+      direccion: '', // Campo adicional para el formulario
+      estado: visita.estado,
+      tecnicoId: visita.tecnicoId || '',
+      supervisorId: visita.supervisorId || '',
       latitud: visita.latitud || '',
       longitud: visita.longitud || ''
     });
@@ -448,11 +567,15 @@ export class VisitaFormComponent implements OnInit {
     
     if (this.isEditing && this.visitaId) {
       const updateData: VisitaUpdateDTO = {
-        ...formValue,
-        fechaVisita: new Date(formValue.fechaVisita),
+        cliente: parseInt(formValue.clienteId),
+        tipo_visita: formValue.tipoVisita,
+        descripcion: formValue.descripcion,
+        observaciones: formValue.observaciones,
+        fecha_programada: this.formatDateTimeForBackend(formValue.fechaProgramada),
+        tecnico: formValue.tecnicoId ? parseInt(formValue.tecnicoId) : undefined,
+        supervisor: formValue.supervisorId ? parseInt(formValue.supervisorId) : undefined,
         latitud: formValue.latitud ? +formValue.latitud : undefined,
-        longitud: formValue.longitud ? +formValue.longitud : undefined,
-        idTecnico: formValue.idTecnico ? +formValue.idTecnico : undefined
+        longitud: formValue.longitud ? +formValue.longitud : undefined
       };
       
       this.visitasService.update(this.visitaId, updateData).subscribe({
@@ -468,13 +591,38 @@ export class VisitaFormComponent implements OnInit {
       });
     } else {
       const createData: VisitaCreateDTO = {
-        ...formValue,
-        fechaVisita: new Date(formValue.fechaVisita),
+        cliente: parseInt(formValue.clienteId),
+        tipo_visita: formValue.tipoVisita,
+        descripcion: formValue.descripcion,
+        observaciones: formValue.observaciones,
+        fecha_programada: this.formatDateTimeForBackend(formValue.fechaProgramada),
         latitud: formValue.latitud ? +formValue.latitud : undefined,
-        longitud: formValue.longitud ? +formValue.longitud : undefined,
-        idTecnico: formValue.idTecnico ? +formValue.idTecnico : undefined,
-        idSupervisor: this.currentUser?.idUsuario
+        longitud: formValue.longitud ? +formValue.longitud : undefined
       };
+      
+      // Asignar técnico (requerido por el backend)
+      if (formValue.tecnicoId && formValue.tecnicoId !== '') {
+        const tecnicoIdParsed = parseInt(formValue.tecnicoId);
+        
+        if (!isNaN(tecnicoIdParsed)) {
+          createData.tecnico = tecnicoIdParsed;
+        } else {
+          this.toastService.showError('ID de técnico inválido');
+          this.loading = false;
+          return;
+        }
+      } else {
+        this.toastService.showError('Debe seleccionar un técnico para la visita');
+        this.loading = false;
+        return;
+      }
+      
+      // Solo agregar supervisor si hay uno válido
+      if (formValue.supervisorId && formValue.supervisorId !== '') {
+        createData.supervisor = parseInt(formValue.supervisorId);
+      } else if (this.currentUser?.idUsuario && ['SUPERVISOR', 'ADMINISTRADOR'].includes(this.currentUser.rol)) {
+        createData.supervisor = this.getUsuarioId(this.currentUser);
+      }
       
       this.visitasService.create(createData).subscribe({
         next: () => {
@@ -482,9 +630,30 @@ export class VisitaFormComponent implements OnInit {
           this.router.navigate(['/dashboard/visitas']);
         },
         error: (error) => {
-          this.toastService.showError('Error al programar la visita');
-          this.loading = false;
           console.error('Error creating visit:', error);
+          this.loading = false;
+          
+          // Mostrar errores específicos del backend
+          if (error.error && error.error.errors && typeof error.error.errors === 'object') {
+            // Manejar errores de validación del backend
+            Object.keys(error.error.errors).forEach(field => {
+              const fieldErrors = error.error.errors[field];
+              if (Array.isArray(fieldErrors)) {
+                fieldErrors.forEach(errorMsg => {
+                  this.toastService.showError(`${field}: ${errorMsg}`);
+                });
+              }
+            });
+          } else if (error.error && error.error.message) {
+            // Mostrar mensaje de error del backend
+            this.toastService.showError(error.error.message);
+          } else if (error.message) {
+            // Mostrar mensaje de error de HTTP
+            this.toastService.showError(error.message);
+          } else {
+            // Mensaje genérico
+            this.toastService.showError('Error al programar la visita');
+          }
         }
       });
     }
@@ -493,6 +662,33 @@ export class VisitaFormComponent implements OnInit {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.visitaForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  isFieldValid(fieldName: string): boolean {
+    const field = this.visitaForm.get(fieldName);
+    return !!(field && field.valid && field.touched);
+  }
+
+  markFieldAsTouched(fieldName: string): void {
+    const field = this.visitaForm.get(fieldName);
+    if (field) {
+      field.markAsTouched();
+    }
+  }
+
+  debugTecnicos(): void {
+    this.loadData();
+  }
+
+  getUsuarioId(usuario: Usuario): number {
+    // El backend envía 'id' pero la interface TypeScript espera 'idUsuario'
+    return (usuario as any).id || usuario.idUsuario;
+  }
+
+  formatDateTimeForBackend(dateString: string): string {
+    // Convierte fecha YYYY-MM-DD a formato ISO con hora por defecto
+    const date = new Date(dateString + 'T09:00:00.000Z');
+    return date.toISOString();
   }
 
   volver(): void {

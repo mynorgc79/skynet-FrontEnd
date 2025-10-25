@@ -126,23 +126,24 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
               </select>
             </div>
             <div class="col-md-2">
-              <label class="form-label">Prioridad</label>
+              <label class="form-label">Tipo de Visita</label>
               <select 
                 class="form-select"
-                [(ngModel)]="filters.prioridad"
+                [(ngModel)]="filters.tipoVisita"
                 (change)="applyFilters()">
-                <option value="">Todas</option>
-                <option value="URGENTE">Urgente</option>
-                <option value="ALTA">Alta</option>
-                <option value="MEDIA">Media</option>
-                <option value="BAJA">Baja</option>
+                <option value="">Todos los tipos</option>
+                <option value="MANTENIMIENTO">Mantenimiento</option>
+                <option value="INSTALACION">Instalación</option>
+                <option value="SOPORTE">Soporte</option>
+                <option value="INSPECCION">Inspección</option>
+                <option value="REPARACION">Reparación</option>
               </select>
             </div>
             <div class="col-md-2" *ngIf="currentUser?.rol !== 'TECNICO'">
               <label class="form-label">Técnico</label>
               <select 
                 class="form-select"
-                [(ngModel)]="filters.idTecnico"
+                [(ngModel)]="filters.tecnicoId"
                 (change)="applyFilters()">
                 <option value="">Todos</option>
                 <option *ngFor="let tecnico of tecnicos" [value]="tecnico.idUsuario">
@@ -184,9 +185,9 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                       <div class="d-flex justify-content-between align-items-start">
                         <div class="grow">
                           <small class="fw-bold">{{ visita.cliente?.nombre || 'Cliente' }}</small><br>
-                          <small class="text-muted">{{ visita.motivo }}</small><br>
+                          <small class="text-muted">{{ visita.descripcion }}</small><br>
                           <small class="text-primary">
-                            📅 {{ formatDate(visita.fechaVisita) }} - {{ visitasService.getTimeRange(visita) }}
+                            📅 {{ formatDate(visita.fechaProgramada) }}
                           </small>
                         </div>
                         <span class="badge ms-2" 
@@ -216,13 +217,12 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
             <table class="table table-hover mb-0">
               <thead class="table-light">
                 <tr>
-                  <th>Fecha y Hora</th>
+                  <th>Fecha</th>
                   <th>Cliente</th>
-                  <th>Motivo</th>
+                  <th>Tipo de Visita</th>
                   <th>Técnico</th>
-                  <th>Prioridad</th>
                   <th>Estado</th>
-                  <th>Duración</th>
+                  <th>Observaciones</th>
                   <th class="text-center">Acciones</th>
                 </tr>
               </thead>
@@ -230,8 +230,8 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                 <tr *ngFor="let visita of visitasFiltradas; trackBy: trackByVisita">
                   <td>
                     <div>
-                      <div class="fw-semibold">{{ formatDate(visita.fechaVisita) }}</div>
-                      <small class="text-muted">{{ visitasService.getTimeRange(visita) }}</small>
+                      <div class="fw-semibold">{{ formatDate(visita.fechaProgramada) }}</div>
+                      <small class="text-muted">{{ visitasService.getTipoVisitaLabel(visita.tipoVisita) }}</small>
                     </div>
                   </td>
                   <td>
@@ -242,7 +242,7 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                   </td>
                   <td>
                     <div>
-                      <div class="fw-medium">{{ visita.motivo }}</div>
+                      <div class="fw-medium">{{ visitasService.getTipoVisitaLabel(visita.tipoVisita) }}</div>
                       <small class="text-muted" *ngIf="visita.descripcion">{{ visita.descripcion | slice:0:50 }}{{ visita.descripcion!.length > 50 ? '...' : '' }}</small>
                     </div>
                   </td>
@@ -254,18 +254,13 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                   </td>
                   <td>
                     <span class="badge" 
-                          [class]="'bg-' + visitasService.getPrioridadColor(visita.prioridad)">
-                      {{ visitasService.getPrioridadLabel(visita.prioridad) }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge" 
                           [class]="'bg-' + visitasService.getEstadoColor(visita.estado)">
                       {{ visitasService.getEstadoLabel(visita.estado) }}
                     </span>
                   </td>
                   <td>
-                    <small>{{ visitasService.formatDuration(visita.duracionEstimada || 60) }}</small>
+                    <small *ngIf="visita.observaciones">{{ visita.observaciones | slice:0:30 }}{{ visita.observaciones!.length > 30 ? '...' : '' }}</small>
+                    <small *ngIf="!visita.observaciones" class="text-muted">Sin observaciones</small>
                   </td>
                   <td class="text-center">
                     <div class="btn-group btn-group-sm">
@@ -384,9 +379,9 @@ export class VisitasListComponent implements OnInit {
     
     // Aplicar filtros por rol
     if (this.currentUser?.rol === 'TECNICO') {
-      this.filters.idTecnico = this.currentUser.idUsuario;
+      this.filters.tecnicoId = this.currentUser.idUsuario;
     } else if (this.currentUser?.rol === 'SUPERVISOR') {
-      this.filters.idSupervisor = this.currentUser.idUsuario;
+      this.filters.supervisorId = this.currentUser.idUsuario;
     }
     
     this.cargarVisitas();
@@ -409,14 +404,18 @@ export class VisitasListComponent implements OnInit {
   }
 
   cargarEstadisticas(): void {
-    this.visitasService.getEstadisticas().subscribe({
-      next: (stats) => {
-        this.estadisticas = stats;
-      },
-      error: (error) => {
-        console.error('Error loading statistics:', error);
-      }
-    });
+    // Calcular estadísticas localmente ya que el servicio no tiene getEstadisticas
+    const programadas = this.visitas.filter(v => v.estado === EstadoVisita.PROGRAMADA).length;
+    const enProgreso = this.visitas.filter(v => v.estado === EstadoVisita.EN_PROGRESO).length;
+    const completadas = this.visitas.filter(v => v.estado === EstadoVisita.COMPLETADA).length;
+    const total = this.visitas.length;
+    
+    this.estadisticas = {
+      programadas,
+      enProgreso,
+      completadas,
+      total
+    };
   }
 
   applyFilters(): void {
@@ -442,9 +441,9 @@ export class VisitasListComponent implements OnInit {
     
     // Reaplicar filtros por rol
     if (this.currentUser?.rol === 'TECNICO') {
-      this.filters.idTecnico = this.currentUser.idUsuario;
+      this.filters.tecnicoId = this.currentUser.idUsuario;
     } else if (this.currentUser?.rol === 'SUPERVISOR') {
-      this.filters.idSupervisor = this.currentUser.idUsuario;
+      this.filters.supervisorId = this.currentUser.idUsuario;
     }
     
     this.cargarVisitas();
@@ -526,12 +525,11 @@ export class VisitasListComponent implements OnInit {
     }
   }
 
-  // Utility methods
   trackByVisita(index: number, visita: Visita): number {
     return visita.idVisita;
   }
 
-  formatDate(date: Date): string {
+  formatDate(date: Date | string): string {
     return new Date(date).toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
@@ -541,8 +539,8 @@ export class VisitasListComponent implements OnInit {
 
   canManageVisita(visita: Visita): boolean {
     if (this.currentUser?.rol === 'ADMINISTRADOR') return true;
-    if (this.currentUser?.rol === 'SUPERVISOR') return visita.idSupervisor === this.currentUser.idUsuario;
-    if (this.currentUser?.rol === 'TECNICO') return visita.idTecnico === this.currentUser.idUsuario;
+    if (this.currentUser?.rol === 'SUPERVISOR') return visita.supervisorId === this.currentUser.idUsuario;
+    if (this.currentUser?.rol === 'TECNICO') return visita.tecnicoId === this.currentUser.idUsuario;
     return false;
   }
 }

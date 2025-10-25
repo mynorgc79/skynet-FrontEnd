@@ -1,94 +1,123 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { BaseApiService } from '@core/services/base-api.service';
-import { MockDataService } from '@core/services/mock-data.service';
-import { Visita, VisitaCreateDTO, VisitaUpdateDTO, VisitaFilter, EstadoVisita } from '@core/interfaces';
+import { Visita, VisitaCreateDTO, VisitaUpdateDTO, VisitaFilter, EstadoVisita, ApiResponse } from '@core/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
-export class VisitasService {
+export class VisitasService extends BaseApiService {
 
-  private readonly endpoint = 'visitas';
+  private readonly endpoint = '/visitas';
 
-  constructor(
-    private baseApiService: BaseApiService,
-    private mockDataService: MockDataService
-  ) { }
-
-  // Métodos que usarán la API cuando esté disponible
+  // CRUD básico
   getAll(filters?: VisitaFilter): Observable<Visita[]> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.get<Visita[]>(`${this.endpoint}`, filters);
-    return this.mockDataService.getVisitasData(filters);
+    return this.get<Visita[]>(`${this.endpoint}/`, filters).pipe(
+      map((response: ApiResponse<Visita[]>) => response.data || [])
+    );
   }
 
   getById(id: number): Observable<Visita> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.get<Visita>(`${this.endpoint}/${id}`);
-    return this.mockDataService.getVisitaById(id);
+    return this.get<Visita>(`${this.endpoint}/${id}/`).pipe(
+      map((response: ApiResponse<Visita>) => response.data)
+    );
   }
 
   create(visita: VisitaCreateDTO): Observable<Visita> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.post<Visita>(this.endpoint, visita);
-    return this.mockDataService.createVisita(visita);
+    return this.post<Visita>(`${this.endpoint}/create/`, visita).pipe(
+      map((response: ApiResponse<Visita>) => response.data)
+    );
   }
 
   update(id: number, visita: VisitaUpdateDTO): Observable<Visita> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<Visita>(`${this.endpoint}/${id}`, visita);
-    return this.mockDataService.updateVisita(id, visita);
+    return this.put<Visita>(`${this.endpoint}/${id}/update/`, visita).pipe(
+      map((response: ApiResponse<Visita>) => response.data)
+    );
   }
 
-  delete(id: number): Observable<void> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.delete<void>(`${this.endpoint}/${id}`);
-    return this.mockDataService.deleteVisita(id);
+  deleteVisita(id: number): Observable<void> {
+    return this.delete<void>(`${this.endpoint}/${id}/delete/`).pipe(
+      map(() => void 0)
+    );
   }
 
-  // Métodos específicos del dominio
+  // Gestión de estados
   iniciar(id: number): Observable<Visita> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<Visita>(`${this.endpoint}/${id}/iniciar`, {});
-    return this.mockDataService.iniciarVisita(id);
+    return this.post<Visita>(`${this.endpoint}/${id}/iniciar/`, {}).pipe(
+      map((response: ApiResponse<Visita>) => response.data)
+    );
   }
 
   completar(id: number, observaciones?: string): Observable<Visita> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<Visita>(`${this.endpoint}/${id}/completar`, { observaciones });
-    return this.mockDataService.completarVisita(id, observaciones);
+    const data = observaciones ? { observaciones } : {};
+    return this.post<Visita>(`${this.endpoint}/${id}/completar/`, data).pipe(
+      map((response: ApiResponse<Visita>) => response.data)
+    );
   }
 
   cancelar(id: number, motivo?: string): Observable<Visita> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<Visita>(`${this.endpoint}/${id}/cancelar`, { motivo });
-    return this.mockDataService.cancelarVisita(id, motivo);
+    const data = motivo ? { motivo } : {};
+    return this.post<Visita>(`${this.endpoint}/${id}/cancelar/`, data).pipe(
+      map((response: ApiResponse<Visita>) => response.data)
+    );
   }
 
-  // Consultas específicas
+  // Reprogramación
+  reprogramar(id: number, nuevaFecha: string, horaInicio?: string): Observable<Visita> {
+    const data: any = { nueva_fecha: nuevaFecha };
+    if (horaInicio) {
+      data.hora_inicio = horaInicio;
+    }
+    return this.post<Visita>(`${this.endpoint}/${id}/reprogramar/`, data).pipe(
+      map((response: ApiResponse<Visita>) => response.data)
+    );
+  }
+
+  // Gestión de ejecuciones
+  getEjecuciones(visitaId: number): Observable<any[]> {
+    return this.get<any[]>(`${this.endpoint}/${visitaId}/ejecuciones/`).pipe(
+      map((response: ApiResponse<any[]>) => response.data || [])
+    );
+  }
+
+  createEjecucion(visitaId: number, ejecucionData: any): Observable<any> {
+    return this.post<any>(`${this.endpoint}/${visitaId}/ejecuciones/create/`, ejecucionData).pipe(
+      map((response: ApiResponse<any>) => response.data)
+    );
+  }
+
+  updateEjecucion(visitaId: number, ejecucionId: number, ejecucionData: any): Observable<any> {
+    return this.put<any>(`${this.endpoint}/${visitaId}/ejecuciones/${ejecucionId}/update/`, ejecucionData).pipe(
+      map((response: ApiResponse<any>) => response.data)
+    );
+  }
+
+  deleteEjecucion(visitaId: number, ejecucionId: number): Observable<void> {
+    return this.delete<void>(`${this.endpoint}/${visitaId}/ejecuciones/${ejecucionId}/delete/`).pipe(
+      map(() => void 0)
+    );
+  }
+
+  // Consultas específicas con filtros del backend
   getByTecnico(tecnicoId: number): Observable<Visita[]> {
-    return this.mockDataService.getVisitasByTecnico(tecnicoId);
+    return this.getAll({ tecnicoId });
   }
 
   getBySupervisor(supervisorId: number): Observable<Visita[]> {
-    return this.mockDataService.getVisitasBySupervisor(supervisorId);
+    return this.getAll({ supervisorId });
   }
 
   getByCliente(clienteId: number): Observable<Visita[]> {
-    return this.mockDataService.getVisitasByCliente(clienteId);
+    return this.getAll({ clienteId });
   }
 
   getHoy(): Observable<Visita[]> {
-    return this.mockDataService.getVisitasHoy();
+    const today = new Date();
+    return this.getAll({ fechaDesde: today, fechaHasta: today });
   }
 
   getByEstado(estado: EstadoVisita): Observable<Visita[]> {
-    return this.mockDataService.getVisitasPorEstado(estado);
-  }
-
-  getEstadisticas(): Observable<any> {
-    return this.mockDataService.getEstadisticasVisitas();
+    return this.getAll({ estado });
   }
 
   // Métodos de utilidad
@@ -122,14 +151,15 @@ export class VisitasService {
     return labels[estado] || estado;
   }
 
-  getPrioridadLabel(prioridad: string): string {
+  getTipoVisitaLabel(tipo: string): string {
     const labels = {
-      'URGENTE': 'Urgente',
-      'ALTA': 'Alta',
-      'MEDIA': 'Media',
-      'BAJA': 'Baja'
+      'MANTENIMIENTO': 'Mantenimiento',
+      'INSTALACION': 'Instalación',
+      'SOPORTE': 'Soporte',
+      'INSPECCION': 'Inspección',
+      'REPARACION': 'Reparación'
     };
-    return labels[prioridad as keyof typeof labels] || prioridad;
+    return labels[tipo as keyof typeof labels] || tipo;
   }
 
   // Validaciones
@@ -147,6 +177,10 @@ export class VisitasService {
 
   canEdit(visita: Visita): boolean {
     return visita.estado === EstadoVisita.PROGRAMADA;
+  }
+
+  canReprogramar(visita: Visita): boolean {
+    return visita.estado === EstadoVisita.PROGRAMADA || visita.estado === EstadoVisita.CANCELADA;
   }
 
   // Formateo
@@ -168,12 +202,22 @@ export class VisitasService {
     return `${mins}m`;
   }
 
-  getTimeRange(visita: Visita): string {
-    const inicio = this.formatTime(visita.horaInicio);
-    const fin = this.formatTime(visita.horaFin);
-    if (fin) {
-      return `${inicio} - ${fin}`;
+  // Formateo de fechas específico para el backend
+  formatDateForApi(date: Date | string): string {
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0]; // YYYY-MM-DD
     }
-    return `${inicio} (${this.formatDuration(visita.duracionEstimada || 60)})`;
+    return date;
+  }
+
+  formatTimeForApi(time: Date | string): string {
+    if (time instanceof Date) {
+      return time.toTimeString().substring(0,8); // HH:MM:SS
+    }
+    return time;
+  }
+
+  formatDateTimeForApi(dateTime: Date): string {
+    return dateTime.toISOString(); // Formato completo ISO
   }
 }

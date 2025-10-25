@@ -60,10 +60,6 @@ import { Visita, Usuario } from '@core/interfaces';
                           [class]="'bg-' + visitasService.getEstadoColor(visita.estado)">
                       {{ visitasService.getEstadoLabel(visita.estado) }}
                     </span>
-                    <span class="badge fs-6 px-3 py-2" 
-                          [class]="'bg-' + visitasService.getPrioridadColor(visita.prioridad)">
-                      {{ visitasService.getPrioridadLabel(visita.prioridad) }}
-                    </span>
                   </div>
                 </div>
                 <div class="col-md-6 text-end">
@@ -106,29 +102,24 @@ import { Visita, Usuario } from '@core/interfaces';
             <div class="card-body">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Motivo</label>
-                  <p class="form-control-plaintext">{{ visita.motivo }}</p>
+                  <label class="form-label fw-semibold">Tipo de Visita</label>
+                  <p class="form-control-plaintext">{{ visitasService.getTipoVisitaLabel(visita.tipoVisita) }}</p>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Fecha y Hora</label>
+                  <label class="form-label fw-semibold">Fecha Programada</label>
                   <p class="form-control-plaintext">
-                    {{ formatDate(visita.fechaVisita) }}
-                    <span *ngIf="visita.horaEstimada" class="text-muted">a las {{ visita.horaEstimada }}</span>
+                    {{ formatDate(visita.fechaProgramada) }}
                   </p>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Duración Estimada</label>
-                  <p class="form-control-plaintext">{{ visitasService.formatDuration(visita.duracionEstimada || 60) }}</p>
-                </div>
-                <div class="col-md-6" *ngIf="visita.horaInicio || visita.horaFin">
+                <div class="col-md-6" *ngIf="visita.fechaInicio || visita.fechaFin">
                   <label class="form-label fw-semibold">Tiempo Real</label>
                   <p class="form-control-plaintext">
-                    <span *ngIf="visita.horaInicio">
-                      Inicio: {{ formatDateTime(visita.horaInicio) }}
+                    <span *ngIf="visita.fechaInicio">
+                      Inicio: {{ formatDateTime(visita.fechaInicio) }}
                     </span>
-                    <br *ngIf="visita.horaInicio && visita.horaFin">
-                    <span *ngIf="visita.horaFin">
-                      Fin: {{ formatDateTime(visita.horaFin) }}
+                    <br *ngIf="visita.fechaInicio && visita.fechaFin">
+                    <span *ngIf="visita.fechaFin">
+                      Fin: {{ formatDateTime(visita.fechaFin) }}
                     </span>
                   </p>
                 </div>
@@ -187,7 +178,7 @@ import { Visita, Usuario } from '@core/interfaces';
                 <div class="col-12">
                   <label class="form-label fw-semibold">Dirección</label>
                   <p class="form-control-plaintext">
-                    {{ visita.direccion || visita.cliente?.direccion || 'No especificada' }}
+                    {{ visita.cliente?.direccion || 'No especificada' }}
                   </p>
                 </div>
                 <div class="col-md-6" *ngIf="visita.latitud && visita.longitud">
@@ -213,7 +204,7 @@ import { Visita, Usuario } from '@core/interfaces';
           </div>
 
           <!-- Observaciones y notas -->
-          <div class="card mb-4" *ngIf="visita.observaciones || visita.motivoCancelacion">
+          <div class="card mb-4" *ngIf="visita.observaciones">
             <div class="card-header">
               <h5 class="mb-0">
                 <i class="fas fa-sticky-note me-2"></i>
@@ -222,12 +213,8 @@ import { Visita, Usuario } from '@core/interfaces';
             </div>
             <div class="card-body">
               <div *ngIf="visita.observaciones">
-                <label class="form-label fw-semibold">Observaciones finales</label>
+                <label class="form-label fw-semibold">Observaciones</label>
                 <p class="form-control-plaintext">{{ visita.observaciones }}</p>
-              </div>
-              <div *ngIf="visita.motivoCancelacion" class="mt-3">
-                <label class="form-label fw-semibold text-danger">Motivo de cancelación</label>
-                <p class="form-control-plaintext text-danger">{{ visita.motivoCancelacion }}</p>
               </div>
             </div>
           </div>
@@ -323,21 +310,21 @@ import { Visita, Usuario } from '@core/interfaces';
                     <div>Visita programada</div>
                   </div>
                 </div>
-                <div class="timeline-item" *ngIf="visita.horaInicio">
+                <div class="timeline-item" *ngIf="visita.fechaInicio">
                   <div class="timeline-marker bg-warning"></div>
                   <div class="timeline-content">
-                    <small class="text-muted">{{ formatDateTime(visita.horaInicio) }}</small>
+                    <small class="text-muted">{{ formatDateTime(visita.fechaInicio) }}</small>
                     <div>Visita iniciada</div>
                   </div>
                 </div>
-                <div class="timeline-item" *ngIf="visita.horaFin">
+                <div class="timeline-item" *ngIf="visita.fechaFin">
                   <div class="timeline-marker bg-success"></div>
                   <div class="timeline-content">
-                    <small class="text-muted">{{ formatDateTime(visita.horaFin) }}</small>
+                    <small class="text-muted">{{ formatDateTime(visita.fechaFin) }}</small>
                     <div>Visita completada</div>
                   </div>
                 </div>
-                <div class="timeline-item" *ngIf="visita.motivoCancelacion">
+                <div class="timeline-item" *ngIf="visita.estado === 'CANCELADA'">
                   <div class="timeline-marker bg-danger"></div>
                   <div class="timeline-content">
                     <small class="text-muted">{{ formatDateTime(visita.fechaActualizacion) }}</small>
@@ -469,8 +456,8 @@ export class VisitaDetailComponent implements OnInit {
     if (!this.visita || !this.currentUser) return false;
     
     if (this.currentUser.rol === 'ADMINISTRADOR') return true;
-    if (this.currentUser.rol === 'SUPERVISOR') return this.visita.idSupervisor === this.currentUser.idUsuario;
-    if (this.currentUser.rol === 'TECNICO') return this.visita.idTecnico === this.currentUser.idUsuario;
+    if (this.currentUser.rol === 'SUPERVISOR') return this.visita.supervisorId === this.currentUser.idUsuario;
+    if (this.currentUser.rol === 'TECNICO') return this.visita.tecnicoId === this.currentUser.idUsuario;
     
     return false;
   }
@@ -567,10 +554,10 @@ export class VisitaDetailComponent implements OnInit {
   }
 
   getTiempoTranscurrido(): string | null {
-    if (!this.visita?.horaInicio || !this.visita?.horaFin) return null;
+    if (!this.visita?.fechaInicio || !this.visita?.fechaFin) return null;
     
-    const inicio = new Date(this.visita.horaInicio);
-    const fin = new Date(this.visita.horaFin);
+    const inicio = new Date(this.visita.fechaInicio);
+    const fin = new Date(this.visita.fechaFin);
     const diffMs = fin.getTime() - inicio.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const hours = Math.floor(diffMins / 60);
