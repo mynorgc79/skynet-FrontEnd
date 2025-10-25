@@ -101,9 +101,9 @@ import { Usuario, Visita } from '@core/interfaces';
                       <small class="text-muted">{{ visita.cliente?.email }}</small>
                     </td>
                     <td>{{ visita.tecnico?.nombre }} {{ visita.tecnico?.apellido }}</td>
-                    <td>{{ formatTime(visita.fechaVisita) }}</td>
+                    <td>{{ formatTime(visita.fechaProgramada) }}</td>
                     <td>
-                      <small>{{ visita.motivo }}</small>
+                      <small>{{ getTipoVisitaLabel(visita.tipoVisita) }}</small>
                     </td>
                     <td>
                       <span class="badge bg-{{ getEstadoBadgeColor(visita.estado) }}">
@@ -405,14 +405,25 @@ export class DashboardComponent implements OnInit {
     return labels[estado as keyof typeof labels] || estado;
   }
 
+  getTipoVisitaLabel(tipo: string): string {
+    const labels = {
+      'MANTENIMIENTO': 'Mantenimiento',
+      'INSTALACION': 'Instalación',
+      'SOPORTE': 'Soporte',
+      'INSPECCION': 'Inspección',
+      'REPARACION': 'Reparación'
+    };
+    return labels[tipo as keyof typeof labels] || tipo;
+  }
+
   canStartVisita(visita: Visita): boolean {
     return this.userRole === 'TECNICO' && 
            visita.estado === 'PROGRAMADA' && 
-           visita.idTecnico === this.currentUser?.idUsuario;
+           visita.tecnicoId === this.currentUser?.idUsuario;
   }
 
   canManageVisita(visita: Visita): boolean {
     return this.userRole === 'SUPERVISOR' && 
-           visita.idSupervisor === this.currentUser?.idUsuario;
+           visita.supervisorId === this.currentUser?.idUsuario;
   }
 }

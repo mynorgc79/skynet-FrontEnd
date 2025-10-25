@@ -148,7 +148,7 @@ import { Cliente } from '@core/interfaces';
               <div *ngIf="!loadingVisitas && historialVisitas.length > 0">
                 <div *ngFor="let visita of historialVisitas.slice(0, 5)" class="visita-item mb-2">
                   <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
+                    <div class="grow">
                       <div class="fw-medium">{{ visita.motivo }}</div>
                       <small class="text-muted">
                         {{ formatDate(visita.fechaVisita) }} 
