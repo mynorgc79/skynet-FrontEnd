@@ -63,23 +63,23 @@ import { Visita, Usuario } from '@core/interfaces';
                   </div>
                 </div>
                 <div class="col-md-6 text-end">
-                  <div class="btn-group" *ngIf="canManage()">
+                  <div class="btn-group">
                     <button 
-                      *ngIf="visitasService.canIniciar(visita)"
+                      *ngIf="canIniciarVisita()"
                       class="btn btn-success"
                       (click)="iniciarVisita()">
                       <i class="fas fa-play me-2"></i>
                       Iniciar Visita
                     </button>
                     <button 
-                      *ngIf="visitasService.canCompletar(visita)"
+                      *ngIf="canCompletarVisita()"
                       class="btn btn-info"
                       (click)="completarVisita()">
                       <i class="fas fa-check me-2"></i>
                       Completar
                     </button>
                     <button 
-                      *ngIf="visitasService.canCancelar(visita)"
+                      *ngIf="canCancelarVisita()"
                       class="btn btn-danger"
                       (click)="cancelarVisita()">
                       <i class="fas fa-times me-2"></i>
@@ -448,16 +448,57 @@ export class VisitaDetailComponent implements OnInit {
   }
 
   canEdit(): boolean {
-    if (!this.visita) return false;
-    return this.visitasService.canEdit(this.visita) && this.canManage();
+    if (!this.visita || !this.visitasService.canEdit(this.visita)) return false;
+    
+    // Solo ADMINISTRADORES y SUPERVISORES pueden editar visitas
+    if (this.currentUser?.rol === 'ADMINISTRADOR') return true;
+    if (this.currentUser?.rol === 'SUPERVISOR') {
+      return this.visita.supervisorId === this.getUsuarioId(this.currentUser);
+    }
+    // TECNICOS NO pueden editar visitas
+    return false;
+  }
+
+  canIniciarVisita(): boolean {
+    if (!this.visita || !this.visitasService.canIniciar(this.visita)) return false;
+    
+    // Solo TECNICOS pueden iniciar visitas
+    if (this.currentUser?.rol === 'TECNICO') {
+      return this.visita.tecnicoId === this.getUsuarioId(this.currentUser);
+    }
+    // SUPERVISORES y ADMINISTRADORES NO pueden iniciar visitas
+    return false;
+  }
+
+  canCompletarVisita(): boolean {
+    if (!this.visita || !this.visitasService.canCompletar(this.visita)) return false;
+    
+    // Solo TECNICOS pueden completar visitas
+    if (this.currentUser?.rol === 'TECNICO') {
+      return this.visita.tecnicoId === this.getUsuarioId(this.currentUser);
+    }
+    // SUPERVISORES y ADMINISTRADORES NO pueden completar visitas
+    return false;
+  }
+
+  canCancelarVisita(): boolean {
+    if (!this.visita || !this.visitasService.canCancelar(this.visita)) return false;
+    
+    // ADMINISTRADORES y SUPERVISORES pueden cancelar visitas
+    if (this.currentUser?.rol === 'ADMINISTRADOR') return true;
+    if (this.currentUser?.rol === 'SUPERVISOR') {
+      return this.visita.supervisorId === this.getUsuarioId(this.currentUser);
+    }
+    // TECNICOS NO pueden cancelar visitas
+    return false;
   }
 
   canManage(): boolean {
     if (!this.visita || !this.currentUser) return false;
     
     if (this.currentUser.rol === 'ADMINISTRADOR') return true;
-    if (this.currentUser.rol === 'SUPERVISOR') return this.visita.supervisorId === this.currentUser.idUsuario;
-    if (this.currentUser.rol === 'TECNICO') return this.visita.tecnicoId === this.currentUser.idUsuario;
+    if (this.currentUser.rol === 'SUPERVISOR') return this.visita.supervisorId === this.getUsuarioId(this.currentUser);
+    if (this.currentUser.rol === 'TECNICO') return this.visita.tecnicoId === this.getUsuarioId(this.currentUser);
     
     return false;
   }
@@ -567,5 +608,10 @@ export class VisitaDetailComponent implements OnInit {
       return `${hours}h ${minutes}m`;
     }
     return `${minutes}m`;
+  }
+
+  getUsuarioId(usuario: Usuario): number {
+    // El backend envía 'id' pero la interface TypeScript espera 'idUsuario'
+    return (usuario as any).id || usuario.idUsuario;
   }
 }

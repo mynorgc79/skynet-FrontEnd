@@ -387,6 +387,14 @@ export class VisitaFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
+    
+    // Validar permisos: solo ADMINISTRADORES y SUPERVISORES pueden crear/editar visitas
+    if (this.currentUser?.rol === 'TECNICO') {
+      this.toastService.showError('No tienes permisos para crear o editar visitas');
+      this.router.navigate(['/dashboard/visitas']);
+      return;
+    }
+    
     this.initForm();
     this.loadData();
     this.checkEditMode();

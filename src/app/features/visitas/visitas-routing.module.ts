@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { VisitasListComponent } from './pages/visitas-list.component';
+import { roleGuard } from '@core/guards/auth.guard';
 
 const routes: Routes = [
   {
@@ -9,11 +10,15 @@ const routes: Routes = [
   },
   {
     path: 'nueva',
-    loadComponent: () => import('./components/visita-form.component').then(m => m.VisitaFormComponent)
+    loadComponent: () => import('./components/visita-form.component').then(m => m.VisitaFormComponent),
+    canActivate: [roleGuard],
+    data: { roles: ['ADMINISTRADOR', 'SUPERVISOR'] }
   },
   {
     path: ':id/editar',
-    loadComponent: () => import('./components/visita-form.component').then(m => m.VisitaFormComponent)
+    loadComponent: () => import('./components/visita-form.component').then(m => m.VisitaFormComponent),
+    canActivate: [roleGuard],
+    data: { roles: ['ADMINISTRADOR', 'SUPERVISOR'] }
   },
   {
     path: ':id',

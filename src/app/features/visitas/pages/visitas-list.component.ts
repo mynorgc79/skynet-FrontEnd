@@ -27,6 +27,7 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                 {{ showCalendarView ? 'Vista Lista' : 'Vista Calendario' }}
               </button>
               <button 
+                *ngIf="canCreateVisita()"
                 class="btn btn-success"
                 (click)="nuevaVisita()">
                 <i class="fas fa-plus me-2"></i>
@@ -272,28 +273,28 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                         <i class="fas fa-eye"></i>
                       </button>
                       <button 
-                        *ngIf="visitasService.canEdit(visita)"
+                        *ngIf="canEditVisita(visita)"
                         class="btn btn-outline-warning"
                         (click)="editarVisita(visita.idVisita)"
                         title="Editar">
                         <i class="fas fa-edit"></i>
                       </button>
                       <button 
-                        *ngIf="visitasService.canIniciar(visita) && canManageVisita(visita)"
+                        *ngIf="canIniciarVisita(visita)"
                         class="btn btn-outline-success"
                         (click)="iniciarVisita(visita)"
                         title="Iniciar visita">
                         <i class="fas fa-play"></i>
                       </button>
                       <button 
-                        *ngIf="visitasService.canCompletar(visita) && canManageVisita(visita)"
+                        *ngIf="canCompletarVisita(visita)"
                         class="btn btn-outline-info"
                         (click)="completarVisita(visita)"
                         title="Completar visita">
                         <i class="fas fa-check"></i>
                       </button>
                       <button 
-                        *ngIf="visitasService.canCancelar(visita) && canManageVisita(visita)"
+                        *ngIf="canCancelarVisita(visita)"
                         class="btn btn-outline-danger"
                         (click)="cancelarVisita(visita)"
                         title="Cancelar visita">
@@ -566,6 +567,57 @@ export class VisitasListComponent implements OnInit {
     if (this.currentUser?.rol === 'SUPERVISOR') return visita.supervisorId === this.getUsuarioId(this.currentUser);
     if (this.currentUser?.rol === 'TECNICO') return visita.tecnicoId === this.getUsuarioId(this.currentUser);
     return false;
+  }
+
+  canEditVisita(visita: Visita): boolean {
+    // Solo ADMINISTRADORES y SUPERVISORES pueden editar visitas
+    if (!this.visitasService.canEdit(visita)) return false; // Debe estar PROGRAMADA
+    
+    if (this.currentUser?.rol === 'ADMINISTRADOR') return true;
+    if (this.currentUser?.rol === 'SUPERVISOR') {
+      return visita.supervisorId === this.getUsuarioId(this.currentUser);
+    }
+    // TECNICOS NO pueden editar visitas
+    return false;
+  }
+
+  canIniciarVisita(visita: Visita): boolean {
+    // Solo TECNICOS pueden iniciar visitas
+    if (!this.visitasService.canIniciar(visita)) return false; // Debe estar PROGRAMADA
+    
+    if (this.currentUser?.rol === 'TECNICO') {
+      return visita.tecnicoId === this.getUsuarioId(this.currentUser);
+    }
+    // SUPERVISORES y ADMINISTRADORES NO pueden iniciar visitas
+    return false;
+  }
+
+  canCompletarVisita(visita: Visita): boolean {
+    // Solo TECNICOS pueden completar visitas
+    if (!this.visitasService.canCompletar(visita)) return false; // Debe estar EN_PROGRESO
+    
+    if (this.currentUser?.rol === 'TECNICO') {
+      return visita.tecnicoId === this.getUsuarioId(this.currentUser);
+    }
+    // SUPERVISORES y ADMINISTRADORES NO pueden completar visitas
+    return false;
+  }
+
+  canCancelarVisita(visita: Visita): boolean {
+    // ADMINISTRADORES y SUPERVISORES pueden cancelar visitas
+    if (!this.visitasService.canCancelar(visita)) return false; // No puede estar COMPLETADA
+    
+    if (this.currentUser?.rol === 'ADMINISTRADOR') return true;
+    if (this.currentUser?.rol === 'SUPERVISOR') {
+      return visita.supervisorId === this.getUsuarioId(this.currentUser);
+    }
+    // TECNICOS NO pueden cancelar visitas
+    return false;
+  }
+
+  canCreateVisita(): boolean {
+    // Solo ADMINISTRADORES y SUPERVISORES pueden crear visitas
+    return this.currentUser?.rol === 'ADMINISTRADOR' || this.currentUser?.rol === 'SUPERVISOR';
   }
 
   getUsuarioId(usuario: Usuario): number {
