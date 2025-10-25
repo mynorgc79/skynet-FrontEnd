@@ -44,18 +44,14 @@ export interface Usuario {
 export interface Cliente {
   idCliente: number;
   nombre: string;
-  apellido: string;
+  contacto: string;
+  telefono: string;
   email: string;
-  telefono?: string;
-  empresa?: string;
   direccion: string;
-  ciudad: string;
-  departamento: string;
-  codigoPostal?: string;
   // Coordenadas para Google Maps
   latitud: number;
   longitud: number;
-  coordenadasMaps?: string; // Formato "lat,lng" para URLs
+  tipoCliente: 'INDIVIDUAL' | 'CORPORATIVO';
   activo: boolean;
   fechaCreacion: Date;
   fechaActualizacion: Date;
@@ -125,15 +121,6 @@ export interface CreateUsuarioDto {
   rolId: number;
 }
 
-export interface CreateClienteDto {
-  nombre: string;
-  apellido: string;
-  correo: string;
-  email: string;
-  latitud: number;
-  longitud: number;
-}
-
 export interface CreateVisitaDto {
   idCliente: number;
   idSupervisor: number;
@@ -200,41 +187,33 @@ export interface UsuarioUpdateDTO {
 
 export interface ClienteFilter {
   nombre?: string;
-  ciudad?: string;
-  departamento?: string;
-  empresa?: string;
+  contacto?: string;
+  email?: string;
+  tipoCliente?: 'INDIVIDUAL' | 'CORPORATIVO';
   activo?: boolean;
+  departamento?: string;
 }
 
 export interface ClienteCreateDTO {
   nombre: string;
-  apellido: string;
+  contacto: string;
+  telefono: string;
   email: string;
-  telefono?: string;
-  empresa?: string;
   direccion: string;
-  ciudad: string;
-  departamento: string;
-  codigoPostal?: string;
   latitud: number;
   longitud: number;
-  activo?: boolean;
+  tipoCliente: 'INDIVIDUAL' | 'CORPORATIVO';
 }
 
 export interface ClienteUpdateDTO {
   nombre?: string;
-  apellido?: string;
-  email?: string;
+  contacto?: string;
   telefono?: string;
-  empresa?: string;
+  email?: string;
   direccion?: string;
-  ciudad?: string;
-  departamento?: string;
-  codigoPostal?: string;
   latitud?: number;
   longitud?: number;
-  coordenadasMaps?: string;
-  activo?: boolean;
+  tipoCliente?: 'INDIVIDUAL' | 'CORPORATIVO';
 }
 
 export interface VisitaFilter {

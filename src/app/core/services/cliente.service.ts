@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseApiService } from './base-api.service';
-import { Cliente, CreateClienteDto, ClienteFilter, ApiResponse, PaginatedResponse } from '../interfaces';
+import { Cliente, ClienteCreateDTO, ClienteFilter, ApiResponse, PaginatedResponse } from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +26,7 @@ export class ClienteService extends BaseApiService {
   }
 
   // Crear nuevo cliente
-  createCliente(cliente: CreateClienteDto): Observable<ApiResponse<Cliente>> {
+  createCliente(cliente: ClienteCreateDTO): Observable<ApiResponse<Cliente>> {
     return this.post<Cliente>(this.endpoint, cliente);
   }
 

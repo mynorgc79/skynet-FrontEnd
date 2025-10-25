@@ -49,27 +49,23 @@ import { Cliente, ClienteFilter } from '@core/interfaces';
                 (input)="applyFilters()">
             </div>
             <div class="col-md-2">
-              <label class="form-label">Ciudad</label>
-              <select 
-                class="form-select"
-                [(ngModel)]="filters.ciudad"
-                (change)="applyFilters()">
-                <option value="">Todas las ciudades</option>
-                <option *ngFor="let ciudad of ciudadesDisponibles" [value]="ciudad">
-                  {{ ciudad }}
-                </option>
-              </select>
+              <label class="form-label">Contacto</label>
+              <input 
+                type="text" 
+                class="form-control"
+                placeholder="Buscar contacto..."
+                [(ngModel)]="filters.contacto"
+                (input)="applyFilters()">
             </div>
             <div class="col-md-2">
-              <label class="form-label">Departamento</label>
+              <label class="form-label">Tipo de Cliente</label>
               <select 
                 class="form-select"
-                [(ngModel)]="filters.departamento"
+                [(ngModel)]="filters.tipoCliente"
                 (change)="applyFilters()">
-                <option value="">Todos</option>
-                <option *ngFor="let depto of departamentosDisponibles" [value]="depto">
-                  {{ depto }}
-                </option>
+                <option value="">Todos los tipos</option>
+                <option value="INDIVIDUAL">Individual</option>
+                <option value="CORPORATIVO">Corporativo</option>
               </select>
             </div>
             <div class="col-md-2">
@@ -120,10 +116,10 @@ import { Cliente, ClienteFilter } from '@core/interfaces';
                   <div class="col-md-6" *ngFor="let cliente of clientesFiltrados.slice(0, 4)">
                     <div class="card border-primary">
                       <div class="card-body p-2">
-                        <small class="fw-bold">{{ cliente.nombre }} {{ cliente.apellido }}</small><br>
-                        <small class="text-muted">{{ cliente.empresa }}</small><br>
+                        <small class="fw-bold">{{ cliente.nombre }} - {{ cliente.contacto }}</small><br>
+                        <small class="text-muted">{{ cliente.tipoCliente }}</small><br>
                         <small class="text-primary">
-                          📍 {{ cliente.ciudad }}, {{ cliente.departamento }}
+                          📍 {{ cliente.direccion }}
                         </small>
                         <button 
                           class="btn btn-sm btn-outline-primary float-end"
@@ -167,17 +163,17 @@ import { Cliente, ClienteFilter } from '@core/interfaces';
                   <td>
                     <div class="d-flex align-items-center">
                       <div class="avatar-circle me-3">
-                        {{ getInitials(cliente.nombre, cliente.apellido) }}
+                        {{ getInitials(cliente.nombre, cliente.contacto) }}
                       </div>
                       <div>
-                        <div class="fw-semibold">{{ cliente.nombre }} {{ cliente.apellido }}</div>
+                        <div class="fw-semibold">{{ cliente.nombre }} - {{ cliente.contacto }}</div>
                         <small class="text-muted">ID: {{ cliente.idCliente }}</small>
                       </div>
                     </div>
                   </td>
                   <td>
                     <div>
-                      <div class="fw-medium">{{ cliente.empresa || 'No especificada' }}</div>
+                      <div class="fw-medium">{{ cliente.tipoCliente || 'No especificado' }}</div>
                       <small class="text-muted">{{ cliente.email }}</small>
                     </div>
                   </td>
@@ -189,8 +185,8 @@ import { Cliente, ClienteFilter } from '@core/interfaces';
                   </td>
                   <td>
                     <div>
-                      <div class="fw-medium">{{ cliente.ciudad }}</div>
-                      <small class="text-muted">{{ cliente.departamento }}</small>
+                      <div class="fw-medium">{{ cliente.direccion }}</div>
+                      <small class="text-muted">Coords: {{ cliente.latitud }}, {{ cliente.longitud }}</small>
                       <div class="mt-1">
                         <button 
                           class="btn btn-sm btn-outline-primary"
@@ -322,9 +318,6 @@ export class ClientesListComponent implements OnInit {
   filters: ClienteFilter = {};
   filterStatus: string = '';
   
-  ciudadesDisponibles: string[] = [];
-  departamentosDisponibles: string[] = [];
-
   ngOnInit(): void {
     this.cargarClientes();
   }
@@ -335,7 +328,6 @@ export class ClientesListComponent implements OnInit {
       next: (clientes) => {
         this.clientes = clientes;
         this.clientesFiltrados = [...clientes];
-        this.extractarOpcionesFiltros();
         this.loading = false;
       },
       error: (error) => {
@@ -344,11 +336,6 @@ export class ClientesListComponent implements OnInit {
         console.error('Error loading clients:', error);
       }
     });
-  }
-
-  extractarOpcionesFiltros(): void {
-    this.ciudadesDisponibles = [...new Set(this.clientes.map(c => c.ciudad))].sort();
-    this.departamentosDisponibles = [...new Set(this.clientes.map(c => c.departamento))].sort();
   }
 
   applyFilters(): void {
@@ -411,7 +398,7 @@ export class ClientesListComponent implements OnInit {
     const action = cliente.activo ? 'desactivar' : 'activar';
     
     this.clientesService.toggleStatus(cliente.idCliente).subscribe({
-      next: (updatedCliente) => {
+      next: (updatedCliente: Cliente) => {
         const index = this.clientes.findIndex(c => c.idCliente === cliente.idCliente);
         if (index !== -1) {
           this.clientes[index] = updatedCliente;
@@ -419,7 +406,7 @@ export class ClientesListComponent implements OnInit {
         }
         this.toastService.showSuccess(`Cliente ${action}do correctamente`);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.toastService.showError(`Error al ${action} cliente`);
         console.error(`Error toggling client status:`, error);
       }
@@ -436,8 +423,8 @@ export class ClientesListComponent implements OnInit {
     return cliente.idCliente;
   }
 
-  getInitials(nombre: string, apellido: string): string {
-    return (nombre.charAt(0) + apellido.charAt(0)).toUpperCase();
+  getInitials(nombre: string, contacto: string): string {
+    return (nombre.charAt(0) + contacto.charAt(0)).toUpperCase();
   }
 
   formatDate(date: Date): string {

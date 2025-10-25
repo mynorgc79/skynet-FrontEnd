@@ -152,11 +152,11 @@ import { Visita, Usuario } from '@core/interfaces';
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Nombre</label>
-                  <p class="form-control-plaintext">{{ visita.cliente.nombre }} {{ visita.cliente.apellido }}</p>
+                  <p class="form-control-plaintext">{{ visita.cliente.nombre }} - {{ visita.cliente.contacto }}</p>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Empresa</label>
-                  <p class="form-control-plaintext">{{ visita.cliente.empresa || 'No especificada' }}</p>
+                  <label class="form-label fw-semibold">Tipo de Cliente</label>
+                  <p class="form-control-plaintext">{{ visita.cliente.tipoCliente || 'No especificado' }}</p>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label fw-semibold">Email</label>

@@ -94,7 +94,9 @@ import { Usuario, Visita } from '@core/interfaces';
                 <tbody>
                   <tr *ngFor="let visita of visitas">
                     <td>
-                      <strong>{{ visita.cliente?.nombre }} {{ visita.cliente?.apellido }}</strong>
+                      <strong>{{ visita.cliente?.nombre }}</strong>
+                      <br>
+                      <small class="text-muted">{{ visita.cliente?.contacto }}</small>
                       <br>
                       <small class="text-muted">{{ visita.cliente?.email }}</small>
                     </td>

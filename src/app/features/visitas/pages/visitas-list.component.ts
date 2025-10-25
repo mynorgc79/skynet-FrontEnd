@@ -182,7 +182,7 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                        [class]="'border-' + visitasService.getEstadoColor(visita.estado)">
                     <div class="card-body p-2">
                       <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
+                        <div class="grow">
                           <small class="fw-bold">{{ visita.cliente?.nombre || 'Cliente' }}</small><br>
                           <small class="text-muted">{{ visita.motivo }}</small><br>
                           <small class="text-primary">
@@ -236,8 +236,8 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                   </td>
                   <td>
                     <div>
-                      <div class="fw-medium">{{ visita.cliente?.nombre || 'Cliente' }} {{ visita.cliente?.apellido || '' }}</div>
-                      <small class="text-muted">{{ visita.cliente?.empresa || 'Sin empresa' }}</small>
+                      <div class="fw-medium">{{ visita.cliente?.nombre || 'Cliente' }} - {{ visita.cliente?.contacto || '' }}</div>
+                      <small class="text-muted">{{ visita.cliente?.tipoCliente || 'Sin tipo' }}</small>
                     </div>
                   </td>
                   <td>

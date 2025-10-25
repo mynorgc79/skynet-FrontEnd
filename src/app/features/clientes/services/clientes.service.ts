@@ -1,7 +1,6 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { BaseApiService } from '@core/services/base-api.service';
-import { MockDataService } from '@core/services/mock-data.service';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, catchError, throwError } from 'rxjs';
 import { Cliente, ClienteCreateDTO, ClienteUpdateDTO, ClienteFilter } from '@core/interfaces';
 
 @Injectable({
@@ -9,61 +8,235 @@ import { Cliente, ClienteCreateDTO, ClienteUpdateDTO, ClienteFilter } from '@cor
 })
 export class ClientesService {
 
-  private readonly endpoint = 'clientes';
+  private http = inject(HttpClient);
+  private baseUrl = 'http://localhost:8000/api'; // URL del backend
 
-  constructor(
-    private baseApiService: BaseApiService,
-    private mockDataService: MockDataService
-  ) { }
-
-  // Métodos que usarán la API cuando esté disponible
+  // Métodos que usan la API real
   getAll(filters?: ClienteFilter): Observable<Cliente[]> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.get<Cliente[]>(`${this.endpoint}`, filters);
-    return this.mockDataService.getClientesData(filters);
+    let url = `${this.baseUrl}/clientes/`;
+    
+    // Agregar filtros como query parameters si se proporcionan
+    if (filters) {
+      const params = new URLSearchParams();
+      if (filters.nombre) params.append('nombre', filters.nombre);
+      if (filters.contacto) params.append('contacto', filters.contacto);
+      if (filters.email) params.append('email', filters.email);
+      if (filters.tipoCliente) params.append('tipoCliente', filters.tipoCliente);
+      if (filters.activo !== undefined) params.append('activo', filters.activo.toString());
+      if (filters.departamento) params.append('departamento', filters.departamento);
+      
+      const queryString = params.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
+    }
+    
+    console.log('Haciendo petición GET a:', url);
+    
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        console.log('Respuesta del servidor (lista clientes):', response);
+        if (!response.success || !response.data) {
+          throw new Error('Error al obtener clientes');
+        }
+        
+        // Mapear del formato backend al formato frontend
+        return response.data.map((backendCliente: any) => ({
+          idCliente: backendCliente.idCliente,
+          nombre: backendCliente.nombre,
+          contacto: backendCliente.contacto,
+          telefono: backendCliente.telefono,
+          email: backendCliente.email,
+          direccion: backendCliente.direccion,
+          latitud: parseFloat(backendCliente.latitud),
+          longitud: parseFloat(backendCliente.longitud),
+          tipoCliente: backendCliente.tipoCliente,
+          activo: backendCliente.activo,
+          fechaCreacion: new Date(backendCliente.fechaCreacion),
+          fechaActualizacion: new Date(backendCliente.fechaActualizacion),
+        } as Cliente));
+      }),
+      catchError(error => {
+        console.error('Error fetching clientes:', error);
+        return throwError(() => 'Error al obtener clientes');
+      })
+    );
   }
 
   getById(id: number): Observable<Cliente> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.get<Cliente>(`${this.endpoint}/${id}`);
-    return this.mockDataService.getClienteById(id);
+    const url = `${this.baseUrl}/clientes/${id}/`;
+    console.log('Haciendo petición GET a:', url);
+    
+    return this.http.get<any>(url).pipe(
+      map(response => {
+        console.log('Respuesta del servidor (detalle cliente):', response);
+        if (!response.success || !response.data) {
+          throw new Error('Cliente no encontrado');
+        }
+        
+        // Mapear del formato backend al formato frontend
+        const backendCliente = response.data;
+        return {
+          idCliente: backendCliente.idCliente,
+          nombre: backendCliente.nombre,
+          contacto: backendCliente.contacto,
+          telefono: backendCliente.telefono,
+          email: backendCliente.email,
+          direccion: backendCliente.direccion,
+          latitud: parseFloat(backendCliente.latitud),
+          longitud: parseFloat(backendCliente.longitud),
+          tipoCliente: backendCliente.tipoCliente,
+          activo: backendCliente.activo,
+          fechaCreacion: new Date(backendCliente.fechaCreacion),
+          fechaActualizacion: new Date(backendCliente.fechaActualizacion),
+        } as Cliente;
+      }),
+      catchError(error => {
+        console.error('Error fetching cliente by id:', error);
+        return throwError(() => 'Error al obtener cliente');
+      })
+    );
   }
 
   create(cliente: ClienteCreateDTO): Observable<Cliente> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.post<Cliente>(this.endpoint, cliente);
-    return this.mockDataService.createCliente(cliente);
+    const url = `${this.baseUrl}/clientes/create/`;
+    
+    // Preparar datos en el formato que espera el backend
+    const clienteData = {
+      nombre: cliente.nombre,
+      contacto: cliente.contacto,
+      telefono: cliente.telefono,
+      email: cliente.email,
+      direccion: cliente.direccion,
+      latitud: cliente.latitud,
+      longitud: cliente.longitud,
+      tipoCliente: cliente.tipoCliente
+    };
+    
+    console.log('Haciendo petición POST a:', url, 'con datos:', clienteData);
+    
+    return this.http.post<any>(url, clienteData).pipe(
+      map(response => {
+        console.log('Respuesta del servidor (crear cliente):', response);
+        if (!response.success || !response.data) {
+          throw new Error('Error al crear cliente');
+        }
+        
+        // Mapear del formato backend al formato frontend
+        const backendCliente = response.data;
+        return {
+          idCliente: backendCliente.idCliente,
+          nombre: backendCliente.nombre,
+          contacto: backendCliente.contacto,
+          telefono: backendCliente.telefono,
+          email: backendCliente.email,
+          direccion: backendCliente.direccion,
+          latitud: parseFloat(backendCliente.latitud),
+          longitud: parseFloat(backendCliente.longitud),
+          tipoCliente: backendCliente.tipoCliente,
+          activo: backendCliente.activo,
+          fechaCreacion: new Date(backendCliente.fechaCreacion),
+          fechaActualizacion: new Date(backendCliente.fechaActualizacion),
+        } as Cliente;
+      }),
+      catchError(error => {
+        console.error('Error creating cliente:', error);
+        return throwError(() => 'Error al crear cliente');
+      })
+    );
   }
 
   update(id: number, cliente: ClienteUpdateDTO): Observable<Cliente> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<Cliente>(`${this.endpoint}/${id}`, cliente);
-    return this.mockDataService.updateCliente(id, cliente);
+    const url = `${this.baseUrl}/clientes/${id}/update/`;
+    
+    // Preparar datos en el formato que espera el backend
+    const clienteData = {
+      nombre: cliente.nombre,
+      contacto: cliente.contacto,
+      telefono: cliente.telefono,
+      email: cliente.email,
+      direccion: cliente.direccion,
+      latitud: cliente.latitud,
+      longitud: cliente.longitud,
+      tipoCliente: cliente.tipoCliente
+    };
+    
+    console.log('Haciendo petición PUT a:', url, 'con datos:', clienteData);
+    
+    return this.http.put<any>(url, clienteData).pipe(
+      map(response => {
+        console.log('Respuesta del servidor (actualizar cliente):', response);
+        if (!response.success || !response.data) {
+          throw new Error('Error al actualizar cliente');
+        }
+        
+        // Mapear del formato backend al formato frontend
+        const backendCliente = response.data;
+        return {
+          idCliente: backendCliente.idCliente,
+          nombre: backendCliente.nombre,
+          contacto: backendCliente.contacto,
+          telefono: backendCliente.telefono,
+          email: backendCliente.email,
+          direccion: backendCliente.direccion,
+          latitud: parseFloat(backendCliente.latitud),
+          longitud: parseFloat(backendCliente.longitud),
+          tipoCliente: backendCliente.tipoCliente,
+          activo: backendCliente.activo,
+          fechaCreacion: new Date(backendCliente.fechaCreacion),
+          fechaActualizacion: new Date(backendCliente.fechaActualizacion),
+        } as Cliente;
+      }),
+      catchError(error => {
+        console.error('Error updating cliente:', error);
+        return throwError(() => 'Error al actualizar cliente');
+      })
+    );
   }
 
   delete(id: number): Observable<void> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.delete<void>(`${this.endpoint}/${id}`);
-    return this.mockDataService.deleteCliente(id);
+    const url = `${this.baseUrl}/clientes/${id}/delete/`;
+    console.log('Haciendo petición DELETE a:', url);
+    
+    return this.http.delete<any>(url).pipe(
+      map(response => {
+        console.log('Respuesta del servidor (eliminar cliente):', response);
+        if (!response.success) {
+          throw new Error('Error al eliminar cliente');
+        }
+        return void 0;
+      }),
+      catchError(error => {
+        console.error('Error deleting cliente:', error);
+        return throwError(() => 'Error al eliminar cliente');
+      })
+    );
   }
 
   toggleStatus(id: number): Observable<Cliente> {
-    // TODO: Reemplazar con llamada real a la API
-    // return this.baseApiService.put<Cliente>(`${this.endpoint}/${id}/toggle-status`, {});
-    return this.mockDataService.toggleClienteStatus(id);
+    // TODO: Implementar endpoint toggle-status en el backend
+    // Por ahora simular toggle cambiando el estado local
+    return this.getById(id).pipe(
+      map(cliente => {
+        cliente.activo = !cliente.activo;
+        return cliente;
+      })
+    );
   }
 
   // Métodos específicos del dominio
   getByDepartamento(departamento: string): Observable<Cliente[]> {
-    return this.mockDataService.getClientesByDepartamento(departamento);
+    return this.getAll({ departamento });
   }
 
   getActivos(): Observable<Cliente[]> {
-    return this.mockDataService.getClientesActivos();
+    return this.getAll({ activo: true });
   }
 
   searchByLocation(lat: number, lng: number, radiusKm: number = 10): Observable<Cliente[]> {
-    return this.mockDataService.searchClientesByLocation(lat, lng, radiusKm);
+    // TODO: Implementar búsqueda por ubicación en el backend
+    // Por ahora retornamos todos los clientes
+    return this.getAll();
   }
 
   // Métodos para Google Maps
@@ -82,16 +255,6 @@ export class ClientesService {
 
   // Formatear dirección completa
   getFullAddress(cliente: Cliente): string {
-    const parts = [
-      cliente.direccion,
-      cliente.ciudad,
-      cliente.departamento
-    ].filter(part => part && part.trim());
-    
-    if (cliente.codigoPostal) {
-      parts.push(cliente.codigoPostal);
-    }
-    
-    return parts.join(', ');
+    return cliente.direccion || '';
   }
 }
