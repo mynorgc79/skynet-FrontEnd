@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { VisitasService } from '../services/visitas.service';
+import { UsuarioService } from '../../../core/services/usuario.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
@@ -146,7 +147,7 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
                 [(ngModel)]="filters.tecnicoId"
                 (change)="applyFilters()">
                 <option value="">Todos</option>
-                <option *ngFor="let tecnico of tecnicos" [value]="tecnico.idUsuario">
+                <option *ngFor="let tecnico of tecnicos" [value]="getUsuarioId(tecnico)">
                   {{ tecnico.nombre }} {{ tecnico.apellido }}
                 </option>
               </select>
@@ -352,6 +353,7 @@ import { Visita, VisitaFilter, EstadoVisita, Usuario } from '@core/interfaces';
 export class VisitasListComponent implements OnInit {
   
   visitasService = inject(VisitasService);
+  private usuarioService = inject(UsuarioService);
   private toastService = inject(ToastService);
   private router = inject(Router);
   private authService = inject(AuthService);
@@ -379,13 +381,13 @@ export class VisitasListComponent implements OnInit {
     
     // Aplicar filtros por rol
     if (this.currentUser?.rol === 'TECNICO') {
-      this.filters.tecnicoId = this.currentUser.idUsuario;
+      this.filters.tecnicoId = this.getUsuarioId(this.currentUser);
     } else if (this.currentUser?.rol === 'SUPERVISOR') {
-      this.filters.supervisorId = this.currentUser.idUsuario;
+      this.filters.supervisorId = this.getUsuarioId(this.currentUser);
     }
     
     this.cargarVisitas();
-    this.cargarEstadisticas();
+    this.cargarTecnicos();
   }
 
   cargarVisitas(): void {
@@ -393,6 +395,7 @@ export class VisitasListComponent implements OnInit {
       next: (visitas) => {
         this.visitas = visitas;
         this.visitasFiltradas = [...visitas];
+        this.cargarEstadisticas(); // Mover aquí para que se ejecute después de cargar las visitas
         this.loading = false;
       },
       error: (error) => {
@@ -418,6 +421,27 @@ export class VisitasListComponent implements OnInit {
     };
   }
 
+  cargarTecnicos(): void {
+    this.usuarioService.getTecnicos().subscribe({
+      next: (response) => {
+        this.tecnicos = response.data || [];
+      },
+      error: (error) => {
+        console.error('Error loading technicians:', error);
+        // Intentar método alternativo
+        this.usuarioService.getUsuarios(1, 100).subscribe({
+          next: (response) => {
+            const allUsers = response.data || [];
+            this.tecnicos = allUsers.filter(user => user.rol === 'TECNICO' && user.activo);
+          },
+          error: (error) => {
+            console.error('Error loading users for technicians:', error);
+          }
+        });
+      }
+    });
+  }
+
   applyFilters(): void {
     if (this.fechaDesde) {
       this.filters.fechaDesde = new Date(this.fechaDesde);
@@ -431,7 +455,7 @@ export class VisitasListComponent implements OnInit {
       delete this.filters.fechaHasta;
     }
     
-    this.cargarVisitas();
+    this.cargarVisitas(); // Esto ya incluirá cargarEstadisticas()
   }
 
   limpiarFiltros(): void {
@@ -441,9 +465,9 @@ export class VisitasListComponent implements OnInit {
     
     // Reaplicar filtros por rol
     if (this.currentUser?.rol === 'TECNICO') {
-      this.filters.tecnicoId = this.currentUser.idUsuario;
+      this.filters.tecnicoId = this.getUsuarioId(this.currentUser);
     } else if (this.currentUser?.rol === 'SUPERVISOR') {
-      this.filters.supervisorId = this.currentUser.idUsuario;
+      this.filters.supervisorId = this.getUsuarioId(this.currentUser);
     }
     
     this.cargarVisitas();
@@ -539,8 +563,13 @@ export class VisitasListComponent implements OnInit {
 
   canManageVisita(visita: Visita): boolean {
     if (this.currentUser?.rol === 'ADMINISTRADOR') return true;
-    if (this.currentUser?.rol === 'SUPERVISOR') return visita.supervisorId === this.currentUser.idUsuario;
-    if (this.currentUser?.rol === 'TECNICO') return visita.tecnicoId === this.currentUser.idUsuario;
+    if (this.currentUser?.rol === 'SUPERVISOR') return visita.supervisorId === this.getUsuarioId(this.currentUser);
+    if (this.currentUser?.rol === 'TECNICO') return visita.tecnicoId === this.getUsuarioId(this.currentUser);
     return false;
+  }
+
+  getUsuarioId(usuario: Usuario): number {
+    // El backend envía 'id' pero la interface TypeScript espera 'idUsuario'
+    return (usuario as any).id || usuario.idUsuario;
   }
 }
