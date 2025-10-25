@@ -397,25 +397,65 @@ export class ClientesListComponent implements OnInit {
   toggleClienteStatus(cliente: Cliente): void {
     const action = cliente.activo ? 'desactivar' : 'activar';
     
+    // Mostrar indicador de carga
+    const originalText = cliente.activo ? 'Activo' : 'Inactivo';
+    
     this.clientesService.toggleStatus(cliente.idCliente).subscribe({
       next: (updatedCliente: Cliente) => {
-        const index = this.clientes.findIndex(c => c.idCliente === cliente.idCliente);
-        if (index !== -1) {
-          this.clientes[index] = updatedCliente;
-          this.applyFilters(); // Refresh filtered list
+        // Actualizar en ambas listas
+        const indexOriginal = this.clientes.findIndex(c => c.idCliente === cliente.idCliente);
+        const indexFiltrado = this.clientesFiltrados.findIndex(c => c.idCliente === cliente.idCliente);
+        
+        if (indexOriginal !== -1) {
+          this.clientes[indexOriginal] = updatedCliente;
         }
+        if (indexFiltrado !== -1) {
+          this.clientesFiltrados[indexFiltrado] = updatedCliente;
+        }
+        
         this.toastService.showSuccess(`Cliente ${action}do correctamente`);
+        console.log('Cliente actualizado:', updatedCliente);
       },
       error: (error: any) => {
         this.toastService.showError(`Error al ${action} cliente`);
         console.error(`Error toggling client status:`, error);
+        
+        // Si hay error, mostrar más detalles en consola
+        if (error?.error) {
+          console.error('Detalles del error:', error.error);
+        }
       }
     });
   }
 
   exportarClientes(): void {
-    // Implementar exportación (CSV, Excel, etc.)
-    this.toastService.showInfo('Funcionalidad de exportación en desarrollo');
+    this.loading = true;
+    
+    this.clientesService.exportClientes('csv', this.filters).subscribe({
+      next: (blob: Blob) => {
+        // Crear URL para el blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Crear elemento <a> temporal para descargar
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `clientes_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Limpiar
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        this.toastService.showSuccess('Clientes exportados correctamente');
+        this.loading = false;
+      },
+      error: (error) => {
+        this.toastService.showError('Error al exportar clientes');
+        this.loading = false;
+        console.error('Error exporting clientes:', error);
+      }
+    });
   }
 
   // Utility methods

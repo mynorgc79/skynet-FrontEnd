@@ -214,6 +214,7 @@ export interface ClienteUpdateDTO {
   latitud?: number;
   longitud?: number;
   tipoCliente?: 'INDIVIDUAL' | 'CORPORATIVO';
+  activo?: boolean;
 }
 
 export interface VisitaFilter {

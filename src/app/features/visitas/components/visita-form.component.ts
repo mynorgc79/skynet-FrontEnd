@@ -57,7 +57,7 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
                       [class.is-invalid]="isFieldInvalid('idCliente')">
                       <option value="">Seleccionar cliente</option>
                       <option *ngFor="let cliente of clientes" [value]="cliente.idCliente">
-                        {{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.empresa }}
+                        {{ cliente.nombre }} - {{ cliente.contacto }} ({{ cliente.tipoCliente }})
                       </option>
                     </select>
                     <div class="invalid-feedback">
@@ -67,7 +67,7 @@ import { Visita, VisitaCreateDTO, VisitaUpdateDTO, Cliente, Usuario } from '@cor
                   <div class="col-md-6" *ngIf="selectedCliente">
                     <label class="form-label">Datos de Contacto</label>
                     <div class="form-control-plaintext">
-                      <strong>{{ selectedCliente.nombre }} {{ selectedCliente.apellido }}</strong><br>
+                      <strong>{{ selectedCliente.nombre }} - {{ selectedCliente.contacto }}</strong><br>
                       <small class="text-muted">{{ selectedCliente.email }}</small><br>
                       <small class="text-muted">{{ selectedCliente.telefono }}</small>
                     </div>
