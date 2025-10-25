@@ -61,23 +61,18 @@ export interface Cliente {
 
 export interface Visita {
   idVisita: number;
-  idCliente: number;
-  idTecnico?: number;
-  idSupervisor?: number;
-  motivo: string;
+  clienteId: number;
+  tecnicoId?: number;
+  supervisorId?: number;
+  fechaProgramada: Date;
+  fechaInicio?: Date;
+  fechaFin?: Date;
+  estado: EstadoVisita;
+  tipoVisita: 'MANTENIMIENTO' | 'INSTALACION' | 'SOPORTE' | 'INSPECCION' | 'REPARACION';
   descripcion?: string;
-  fechaVisita: Date;
-  horaEstimada?: string; // formato HH:mm
-  duracionEstimada?: number; // en minutos
-  direccion?: string;
+  observaciones?: string;
   latitud?: number;
   longitud?: number;
-  estado: EstadoVisita;
-  prioridad: 'URGENTE' | 'ALTA' | 'MEDIA' | 'BAJA';
-  horaInicio?: string | Date;
-  horaFin?: string | Date;
-  observaciones?: string;
-  motivoCancelacion?: string;
   fechaCreacion: Date;
   fechaActualizacion: Date;
   
@@ -85,6 +80,7 @@ export interface Visita {
   cliente?: Cliente;
   tecnico?: Usuario;
   supervisor?: Usuario;
+  ejecuciones?: Ejecucion[];
 }
 
 export interface Ejecucion {
@@ -221,40 +217,34 @@ export interface VisitaFilter {
   fechaDesde?: Date;
   fechaHasta?: Date;
   estado?: EstadoVisita;
-  prioridad?: 'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE';
-  idTecnico?: number;
-  idSupervisor?: number;
-  idCliente?: number;
+  tipoVisita?: 'MANTENIMIENTO' | 'INSTALACION' | 'SOPORTE' | 'INSPECCION' | 'REPARACION';
+  tecnicoId?: number;
+  supervisorId?: number;
+  clienteId?: number;
 }
 
 export interface VisitaCreateDTO {
-  idCliente: number;
-  idTecnico?: number;
-  idSupervisor?: number;
-  motivo: string;
+  cliente: number;
+  tecnico?: number;
+  supervisor?: number;
+  fecha_programada: string; // ISO string para el backend
+  tipo_visita: 'MANTENIMIENTO' | 'INSTALACION' | 'SOPORTE' | 'INSPECCION' | 'REPARACION';
   descripcion?: string;
-  fechaVisita: Date;
-  horaEstimada?: string;
-  duracionEstimada?: number;
-  direccion?: string;
+  observaciones?: string;
   latitud?: number;
   longitud?: number;
-  prioridad: 'URGENTE' | 'ALTA' | 'MEDIA' | 'BAJA';
 }
 
 export interface VisitaUpdateDTO {
-  motivo?: string;
+  cliente?: number;
+  tecnico?: number;
+  supervisor?: number;
+  fecha_programada?: string;
+  tipo_visita?: 'MANTENIMIENTO' | 'INSTALACION' | 'SOPORTE' | 'INSPECCION' | 'REPARACION';
   descripcion?: string;
-  fechaVisita?: Date;
-  horaEstimada?: string;
-  duracionEstimada?: number;
-  direccion?: string;
+  observaciones?: string;
   latitud?: number;
   longitud?: number;
-  prioridad?: 'URGENTE' | 'ALTA' | 'MEDIA' | 'BAJA';
-  idTecnico?: number;
-  estado?: EstadoVisita;
-  observaciones?: string;
 }
 
 // Re-exportar interfaces de configuración

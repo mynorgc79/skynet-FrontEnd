@@ -8,7 +8,7 @@ import { ApiResponse, PaginatedResponse } from '../interfaces';
 })
 export class BaseApiService {
   
-  protected baseUrl = 'http://localhost:3000/api'; // Cambiar por tu URL de API
+  protected baseUrl = 'http://localhost:8000/api'; // URL del backend Django
 
   constructor(protected http: HttpClient) { }
 
