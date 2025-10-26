@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, throwError, switchMap } from 'rxjs';
 import { Cliente, ClienteCreateDTO, ClienteUpdateDTO, ClienteFilter } from '@core/interfaces';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ import { Cliente, ClienteCreateDTO, ClienteUpdateDTO, ClienteFilter } from '@cor
 export class ClientesService {
 
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:8000/api'; // URL del backend
+  private baseUrl = environment.apiUrl; // URL del backend desde environment
 
   // Métodos que usan la API real
   getAll(filters?: ClienteFilter): Observable<Cliente[]> {

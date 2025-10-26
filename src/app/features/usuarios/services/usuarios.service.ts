@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, throwError } from 'rxjs';
 import { AuthService } from '@core/services/auth.service';
 import { Usuario, UsuarioCreateDTO, UsuarioUpdateDTO, UsuarioFilter, RoleTipo } from '@core/interfaces';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ export class UsuariosService {
 
   private http = inject(HttpClient);
   private authService = inject(AuthService);
-  private baseUrl = 'http://localhost:8000/api'; // URL del backend
+  private baseUrl = environment.apiUrl; // URL del backend desde environment
 
   // Métodos que usan la API real
   getAll(filters?: UsuarioFilter): Observable<Usuario[]> {
