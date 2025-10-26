@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8000/api', // Cambiar por URL de producción cuando esté lista
+  apiUrl: 'https://skynet-backend-lz8a.onrender.com/api',
   authEndpoints: {
     login: '/usuarios/login/',
     refresh: '/auth/refresh/',
